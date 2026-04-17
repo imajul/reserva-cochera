@@ -1,3 +1,4 @@
+
 """
 Script de PRUEBA — Reserva real en Parkalot.
 Flujo real:
@@ -72,10 +73,10 @@ def click_details_del_dia(page, fecha_str: str):
     # Intentar encontrar DETAILS cerca del texto de la fecha
     # La app muestra "Friday 17th April" — buscamos por texto del día
     try:
-        # Buscar botón DETAILS directamente (si hay una sola tarjeta es el único)
-        details_btn = page.locator("text='DETAILS', a:has-text('DETAILS'), button:has-text('DETAILS')").first
-        details_btn.wait_for(timeout=8000)
-        details_btn.click()
+        # Esperar a que la tarjeta del día cargue
+        page.wait_for_selector("text=DETAILS", timeout=10000)
+        # Hacer click en cualquier elemento que contenga el texto DETAILS
+        page.get_by_text("DETAILS").first.click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
         page.screenshot(path="test_04_post_details.png")
