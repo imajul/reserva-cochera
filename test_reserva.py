@@ -17,7 +17,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 PARKALOT_URL = "https://app.parkalot.io/#/client"
 EMAIL        = os.environ["PARKALOT_EMAIL"]
 PASSWORD     = os.environ["PARKALOT_PASSWORD"]
-TARGET_SPOT  = 237
+TARGET_SPOT  = 209
 
 logging.basicConfig(
     level=logging.INFO,
