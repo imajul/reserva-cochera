@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 PARKALOT_URL    = "https://app.parkalot.io/#/client"
 EMAIL           = os.environ["PARKALOT_EMAIL"]
 PASSWORD        = os.environ["PARKALOT_PASSWORD"]
-TARGET_SPOT     = 237
+TARGET_SPOT     = 209
 DIAS_RESERVA    = {0, 1, 2, 4}   # Lunes=0, Martes=1, Miércoles=2, Viernes=4
 TZ_ARG          = pytz.timezone("America/Argentina/Buenos_Aires")
 
