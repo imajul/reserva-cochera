@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 PARKALOT_URL    = "https://app.parkalot.io/#/client"
 EMAIL           = os.environ["PARKALOT_EMAIL"]
 PASSWORD        = os.environ["PARKALOT_PASSWORD"]
-TARGET_SPOT     = 209
+TARGET_SPOT     = 237
 DIAS_RESERVA    = {0, 1, 2, 4}   # Lunes=0, Martes=1, Miércoles=2, Viernes=4
 TZ_ARG          = pytz.timezone("America/Argentina/Buenos_Aires")
 
@@ -114,11 +114,16 @@ def login(page):
 
     log.info("Iniciando sesión...")
     page.locator(
-        "input[type='email'], input[name='email'], input[placeholder*='mail' i]"
+        "input[type='email'], input[name='email'], "
+        "input[placeholder*='mail' i], input[formcontrolname='email'], "
+        "input:near(:text('email'))"
     ).first.fill(EMAIL)
-    page.locator("input[type='password']").first.fill(PASSWORD)
     page.locator(
-        "button[type='submit'], button:has-text('Ingresar'), button:has-text('Login')"
+        "input[type='password'], input[formcontrolname='password']"
+    ).first.fill(PASSWORD)
+    page.locator(
+        "button:has-text('LOG IN'), button:has-text('Log in'), "
+        "button:has-text('Login'), button:has-text('Ingresar'), button[type='submit']"
     ).first.click()
     page.wait_for_load_state("networkidle")
     page.wait_for_timeout(2000)
