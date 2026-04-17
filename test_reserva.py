@@ -1,16 +1,17 @@
 """
 Script de PRUEBA — Reserva real en Parkalot.
-Igual al script principal pero:
-  - Saltea la espera hasta las 16:00
-  - Saltea la validación de día hábil
-  - Ejecuta inmediatamente el flujo completo y confirma la reserva
-Usarlo para verificar que el sistema funciona correctamente.
+Flujo real:
+  1. Login
+  2. Click en DETAILS del día deseado
+  3. En la pantalla del mapa, buscar la cochera en la lista derecha (scroll)
+  4. Click en la cochera para seleccionarla
+  5. Click en RESERVE
 """
 
 import os
 import sys
 import logging
-from datetime import date, timedelta
+from datetime import date
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 # ─── Configuración ────────────────────────────────────────────────────────────
@@ -42,8 +43,7 @@ def login(page):
     log.info("Iniciando sesión...")
     page.locator(
         "input[type='email'], input[name='email'], "
-        "input[placeholder*='mail' i], input[formcontrolname='email'], "
-        "input:near(:text('email'))"
+        "input[placeholder*='mail' i], input[formcontrolname='email']"
     ).first.fill(EMAIL)
     page.locator(
         "input[type='password'], input[formcontrolname='password']"
@@ -60,119 +60,129 @@ def login(page):
     log.info("Sesión iniciada ✓")
 
 
-def seleccionar_fecha(page, fecha_str: str):
-    log.info(f"Seleccionando fecha: {fecha_str}")
-    try:
-        page.locator(
-            "button:has-text('Nueva'), button:has-text('Reservar'), "
-            "a:has-text('Nueva'), a:has-text('Reservar')"
-        ).first.wait_for(timeout=3000)
-        page.locator(
-            "button:has-text('Nueva'), button:has-text('Reservar'), "
-            "a:has-text('Nueva'), a:has-text('Reservar')"
-        ).first.click()
-        page.wait_for_timeout(1000)
-    except PlaywrightTimeoutError:
-        pass
-
-    try:
-        page.locator("input[type='date']").first.fill(fecha_str)
-    except Exception:
-        try:
-            page.locator(f"text='{fecha_str}'").first.click()
-        except Exception:
-            pass
-
+def click_details_del_dia(page, fecha_str: str):
+    """
+    En la pantalla principal aparecen tarjetas por día.
+    Busca la tarjeta que corresponde a la fecha y hace click en DETAILS.
+    Si hay una sola tarjeta visible (hoy), hace click directo en DETAILS.
+    """
+    log.info(f"Buscando tarjeta del día {fecha_str} y haciendo click en DETAILS...")
     page.wait_for_timeout(1500)
-    page.screenshot(path="test_04_fecha_seleccionada.png")
+
+    # Intentar encontrar DETAILS cerca del texto de la fecha
+    # La app muestra "Friday 17th April" — buscamos por texto del día
+    try:
+        # Buscar botón DETAILS directamente (si hay una sola tarjeta es el único)
+        details_btn = page.locator("text='DETAILS', a:has-text('DETAILS'), button:has-text('DETAILS')").first
+        details_btn.wait_for(timeout=8000)
+        details_btn.click()
+        page.wait_for_load_state("networkidle")
+        page.wait_for_timeout(2000)
+        page.screenshot(path="test_04_post_details.png")
+        log.info("Click en DETAILS ✓")
+    except PlaywrightTimeoutError:
+        log.error("No se encontró el botón DETAILS")
+        page.screenshot(path="test_error_no_details.png")
+        raise
 
 
-def reservar(page, fecha_str: str) -> bool:
-    seleccionar_fecha(page, fecha_str)
+def seleccionar_y_reservar_cochera(page) -> bool:
+    """
+    En la pantalla del mapa:
+    - Lista de cocheras a la derecha
+    - Hacer scroll hasta encontrar TARGET_SPOT
+    - Click en la cochera para seleccionarla
+    - Click en RESERVE
+    """
+    log.info(f"Buscando cochera {TARGET_SPOT} en la lista...")
     page.wait_for_timeout(2000)
+    page.screenshot(path="test_05_pantalla_mapa.png")
 
-    log.info("Buscando cochera 237...")
     cochera_seleccionada = None
 
-    for selector in [
-        f"[data-spot='{TARGET_SPOT}']",
-        f"[data-number='{TARGET_SPOT}']",
-        f".spot:has-text('{TARGET_SPOT}')",
-        f"text='{TARGET_SPOT}'",
-    ]:
-        try:
-            el = page.locator(selector).first
-            if not el.is_visible(timeout=1500):
-                continue
-            clases = el.get_attribute("class") or ""
-            if "disabled" in clases or "occupied" in clases or el.get_attribute("disabled"):
-                log.warning(f"Cochera {TARGET_SPOT} está ocupada.")
-                break
-            log.info(f"Cochera {TARGET_SPOT} disponible → seleccionando...")
-            el.click()
-            cochera_seleccionada = TARGET_SPOT
-            break
-        except PlaywrightTimeoutError:
-            continue
+    # La lista de cocheras está a la derecha — cada ítem muestra el número
+    # Intentar encontrar directamente por texto exacto del número
+    try:
+        # Scroll dentro del panel derecho hasta encontrar la cochera
+        # Parkalot muestra cada cochera como un ítem con su número
+        cochera_item = page.locator(
+            f"text='{TARGET_SPOT}'"
+        ).first
+        cochera_item.scroll_into_view_if_needed()
+        page.wait_for_timeout(500)
+        cochera_item.click()
+        cochera_seleccionada = TARGET_SPOT
+        log.info(f"Cochera {TARGET_SPOT} seleccionada ✓")
+    except Exception:
+        log.warning(f"No se encontró cochera {TARGET_SPOT}, buscando alternativa...")
 
-    # Fallback: más cercana disponible
+    # Si no encontró la cochera objetivo, buscar la más cercana disponible
     if cochera_seleccionada is None:
-        log.info("Buscando cochera alternativa más cercana a 237...")
-        disponibles = []
-        for spot in page.locator(
-            ".spot:not(.disabled):not(.occupied), "
-            ".parking-spot:not(.disabled):not(.occupied)"
-        ).all():
-            try:
-                n = int(''.join(filter(str.isdigit, spot.inner_text().strip())))
-                disponibles.append((n, spot))
-            except ValueError:
-                continue
+        try:
+            # Obtener todos los ítems de la lista de cocheras
+            items = page.locator("text=/^\\d+$/").all()
+            numeros = []
+            for item in items:
+                try:
+                    n = int(item.inner_text().strip())
+                    numeros.append((n, item))
+                except ValueError:
+                    continue
 
-        if not disponibles:
-            log.error("No se encontraron cocheras disponibles.")
+            if not numeros:
+                log.error("No se encontraron cocheras en la lista.")
+                page.screenshot(path="test_error_sin_cocheras.png")
+                return False
+
+            mejor = encontrar_cochera_mas_cercana([n for n, _ in numeros])
+            log.info(f"Seleccionando cochera más cercana: {mejor}")
+            for n, el in numeros:
+                if n == mejor:
+                    el.scroll_into_view_if_needed()
+                    page.wait_for_timeout(300)
+                    el.click()
+                    cochera_seleccionada = mejor
+                    break
+        except Exception as e:
+            log.error(f"Error buscando alternativa: {e}")
             page.screenshot(path="test_error_sin_cocheras.png")
             return False
 
-        mejor = encontrar_cochera_mas_cercana([n for n, _ in disponibles])
-        for n, el in disponibles:
-            if n == mejor:
-                log.info(f"Seleccionando cochera alternativa: {mejor}")
-                el.click()
-                cochera_seleccionada = mejor
-                break
-
     page.wait_for_timeout(1000)
-    page.screenshot(path="test_05_cochera_seleccionada.png")
+    page.screenshot(path="test_06_cochera_seleccionada.png")
 
-    # Confirmar
-    log.info("Confirmando reserva...")
+    # Click en RESERVE
+    log.info("Haciendo click en RESERVE...")
     try:
-        page.locator(
-            "button:has-text('Confirmar'), button:has-text('Reservar'), "
-            "button:has-text('Confirm'), button[type='submit']"
-        ).last.wait_for(timeout=5000)
-        page.locator(
-            "button:has-text('Confirmar'), button:has-text('Reservar'), "
-            "button:has-text('Confirm'), button[type='submit']"
-        ).last.click()
+        reserve_btn = page.locator(
+            "text='RESERVE', button:has-text('RESERVE'), a:has-text('RESERVE')"
+        ).first
+        reserve_btn.wait_for(timeout=5000)
+        reserve_btn.click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
     except PlaywrightTimeoutError:
-        log.error("No se encontró botón de confirmación.")
-        page.screenshot(path="test_error_sin_boton_confirmar.png")
+        log.error("No se encontró el botón RESERVE.")
+        page.screenshot(path="test_error_sin_reserve.png")
         return False
 
-    page.screenshot(path="test_06_resultado_final.png")
+    page.screenshot(path="test_07_resultado_final.png")
+    log.info(f"✅ Reserva enviada — Cochera {cochera_seleccionada}")
 
+    # Confirmar popup si aparece
     try:
-        page.locator(
-            "text='confirmad', text='exitosa', text='success', text='reservad'"
-        ).first.wait_for(timeout=5000)
+        confirm = page.locator(
+            "button:has-text('Confirm'), button:has-text('OK'), "
+            "button:has-text('Yes'), button:has-text('Aceptar')"
+        ).first
+        confirm.wait_for(timeout=3000)
+        confirm.click()
+        page.wait_for_timeout(1500)
+        page.screenshot(path="test_08_confirmacion_final.png")
+        log.info("Confirmación adicional aceptada ✓")
     except PlaywrightTimeoutError:
-        pass
+        pass  # No siempre hay popup de confirmación
 
-    log.info(f"✅ Reserva exitosa — Cochera {cochera_seleccionada} para el {fecha_str}")
     return True
 
 
@@ -181,10 +191,9 @@ def main():
     log.info("  TEST — Reserva real inmediata (sin espera de horario)")
     log.info("=" * 60)
 
-    # Reservar para HOY (modo prueba)
     hoy = date.today()
     fecha_str = hoy.strftime("%Y-%m-%d")
-    log.info(f"Reservando para: {fecha_str}")
+    log.info(f"Reservando cochera {TARGET_SPOT} para: {fecha_str}")
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
@@ -192,7 +201,7 @@ def main():
             args=["--no-sandbox", "--disable-dev-shm-usage"]
         )
         context = browser.new_context(
-            viewport={"width": 1280, "height": 800},
+            viewport={"width": 1440, "height": 900},
             locale="es-AR",
             timezone_id="America/Argentina/Buenos_Aires"
         )
@@ -200,7 +209,8 @@ def main():
 
         try:
             login(page)
-            exito = reservar(page, fecha_str)
+            click_details_del_dia(page, fecha_str)
+            exito = seleccionar_y_reservar_cochera(page)
             if not exito:
                 log.error("❌ La reserva de prueba falló.")
                 sys.exit(1)
