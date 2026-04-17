@@ -17,7 +17,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 PARKALOT_URL = "https://app.parkalot.io/#/client"
 EMAIL        = os.environ["PARKALOT_EMAIL"]
 PASSWORD     = os.environ["PARKALOT_PASSWORD"]
-TARGET_SPOT  = 237
+TARGET_SPOT  = 209
 
 logging.basicConfig(
     level=logging.INFO,
@@ -181,15 +181,9 @@ def main():
     log.info("  TEST — Reserva real inmediata (sin espera de horario)")
     log.info("=" * 60)
 
-    # Reservar para mañana (sin importar qué día sea)
-    manana = date.today() + timedelta(days=1)
-    # Si mañana es sábado, saltar al lunes
-    if manana.weekday() == 5:
-        manana += timedelta(days=2)
-    elif manana.weekday() == 6:
-        manana += timedelta(days=1)
-
-    fecha_str = manana.strftime("%Y-%m-%d")
+    # Reservar para HOY (modo prueba)
+    hoy = date.today()
+    fecha_str = hoy.strftime("%Y-%m-%d")
     log.info(f"Reservando para: {fecha_str}")
 
     with sync_playwright() as p:
