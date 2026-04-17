@@ -90,11 +90,8 @@ def click_details_del_dia(page) -> bool:
     log.info("Buscando botón DETAILS...")
     page.wait_for_timeout(1500)
     try:
-        details_btn = page.locator(
-            "text='DETAILS', a:has-text('DETAILS'), button:has-text('DETAILS')"
-        ).first
-        details_btn.wait_for(timeout=8000)
-        details_btn.click()
+        page.wait_for_selector("text=DETAILS", timeout=8000)
+        page.get_by_text("DETAILS").first.click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
         log.info("Click en DETAILS ✓")
