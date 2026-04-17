@@ -1,0 +1,103 @@
+name: Reserva Automática Cochera 237
+
+on:
+  schedule:
+    # 15:55 ARG = 18:55 UTC (UTC-3)
+    # Corre de lunes a jueves para reservar el día siguiente
+    - cron: "55 18 * * 1-4"
+
+  # Ejecución manual — permite elegir entre prueba y producción
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "Modo de ejecución"
+        required: true
+        default: "test"
+        type: choice
+        options:
+          - test       # Reserva real inmediata, sin esperar las 16:00
+          - produccion # Igual al automático: espera las 16:00
+
+jobs:
+
+  # ── Job automático (cron) ─────────────────────────────────────────────────
+  reservar-automatico:
+    name: Reserva automática (cron)
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: pip install playwright pytz
+
+      - name: Instalar Chromium
+        run: |
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Ejecutar reserva automática
+        env:
+          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+        run: python reservar_cochera.py
+
+      - name: Subir screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-auto-${{ github.run_id }}
+          path: "*.png"
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ── Job manual (workflow_dispatch) ────────────────────────────────────────
+  reservar-manual:
+    name: Reserva manual (${{ inputs.modo }})
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: pip install playwright pytz
+
+      - name: Instalar Chromium
+        run: |
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Ejecutar en modo TEST (reserva real, sin espera)
+        if: inputs.modo == 'test'
+        env:
+          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+        run: python test_reserva.py
+
+      - name: Ejecutar en modo PRODUCCIÓN (con espera de las 16:00)
+        if: inputs.modo == 'produccion'
+        env:
+          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+        run: python reservar_cochera.py
+
+      - name: Subir screenshots (diagnóstico paso a paso)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ inputs.modo }}-${{ github.run_id }}
+          path: "*.png"
+          if-no-files-found: ignore
+          retention-days: 7
