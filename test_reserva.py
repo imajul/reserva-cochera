@@ -1,4 +1,3 @@
-
 """
 Script de PRUEBA — Reserva real en Parkalot.
 Flujo real:
@@ -155,11 +154,8 @@ def seleccionar_y_reservar_cochera(page) -> bool:
     # Click en RESERVE
     log.info("Haciendo click en RESERVE...")
     try:
-        reserve_btn = page.locator(
-            "text='RESERVE', button:has-text('RESERVE'), a:has-text('RESERVE')"
-        ).first
-        reserve_btn.wait_for(timeout=5000)
-        reserve_btn.click()
+        page.wait_for_selector("text=RESERVE", timeout=5000)
+        page.get_by_text("RESERVE").first.click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
     except PlaywrightTimeoutError:
