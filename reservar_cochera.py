@@ -1,12 +1,14 @@
 """
 Automatización de reserva de cochera en Parkalot.
-Flujo real:
+Flujo:
   1. Arranca a las 15:55 ARG y espera hasta las 16:00
   2. Login
-  3. Click en DETAILS del día siguiente
-  4. En el mapa, buscar cochera 209 en la lista derecha (scroll)
+  3. Click en el SEGUNDO botón DETAILS (el del día siguiente)
+  4. En el mapa, buscar cochera según orden de prioridad
   5. Click en la cochera → Click en RESERVE
-  Si la 209 está ocupada, reserva la más cercana disponible.
+
+Días de ejecución: domingo, lunes, martes y jueves (para reservar el día siguiente).
+Orden de prioridad: 237 → 209 → 208 → 238 → primera disponible en la lista.
 """
 
 import os
@@ -21,8 +23,14 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 PARKALOT_URL    = "https://app.parkalot.io/#/client"
 EMAIL           = os.environ["PARKALOT_EMAIL"]
 PASSWORD        = os.environ["PARKALOT_PASSWORD"]
-TARGET_SPOT     = 209
-DIAS_RESERVA    = {0, 1, 2, 4}   # Lunes=0, Martes=1, Miércoles=2, Viernes=4
+
+# Orden de prioridad de cocheras
+COCHERAS_PRIORIDAD = [237, 209, 208, 238]
+
+# Días en que corre el script (para reservar el día siguiente hábil)
+# Domingo=6, Lunes=0, Martes=1, Jueves=3
+DIAS_EJECUCION  = {6, 0, 1, 3}
+
 TZ_ARG          = pytz.timezone("America/Argentina/Buenos_Aires")
 HORA_APERTURA   = 16
 MINUTO_APERTURA = 0
@@ -40,17 +48,11 @@ log = logging.getLogger(__name__)
 def ahora_arg() -> datetime:
     return datetime.now(TZ_ARG)
 
-def dia_siguiente_es_habil() -> bool:
-    manana_weekday = (date.today().weekday() + 1) % 7
-    return manana_weekday in DIAS_RESERVA
+def debe_ejecutar_hoy() -> bool:
+    return date.today().weekday() in DIAS_EJECUCION
 
 def fecha_manana_str() -> str:
     return (date.today() + timedelta(days=1)).strftime("%Y-%m-%d")
-
-def encontrar_cochera_mas_cercana(spots: list[int]) -> int | None:
-    if not spots:
-        return None
-    return min(spots, key=lambda x: abs(x - TARGET_SPOT))
 
 def esperar_hasta_previa_apertura():
     ahora = ahora_arg()
@@ -86,15 +88,22 @@ def login(page):
 
 
 def click_details_del_dia(page) -> bool:
-    """Hace click en DETAILS de la tarjeta del día siguiente."""
-    log.info("Buscando botón DETAILS...")
+    """
+    Hace click en el SEGUNDO botón DETAILS (el del día siguiente).
+    Cuando hay dos tarjetas visibles, la primera es el día de hoy
+    y la segunda es el día siguiente.
+    """
+    log.info("Buscando botones DETAILS...")
     page.wait_for_timeout(1500)
     try:
         page.wait_for_selector("text=DETAILS", timeout=8000)
-        page.get_by_text("DETAILS").first.click()
+        details_btns = page.get_by_text("DETAILS").all()
+        log.info(f"Botones DETAILS encontrados: {len(details_btns)}")
+        # Siempre clickear el último (el del día siguiente)
+        details_btns[-1].click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
-        log.info("Click en DETAILS ✓")
+        log.info("Click en DETAILS del día siguiente ✓")
         return True
     except PlaywrightTimeoutError:
         log.warning("No se encontró el botón DETAILS — las reservas aún no están habilitadas.")
@@ -102,57 +111,58 @@ def click_details_del_dia(page) -> bool:
 
 
 def seleccionar_y_reservar_cochera(page) -> bool:
-    """Busca la cochera en la lista derecha, la selecciona y presiona RESERVE."""
-    log.info(f"Buscando cochera {TARGET_SPOT} en la lista...")
+    """
+    Busca la cochera según orden de prioridad: 237 → 209 → 208 → 238 → primera disponible.
+    """
+    log.info("Obteniendo cocheras disponibles en la lista...")
     page.wait_for_timeout(2000)
 
-    cochera_seleccionada = None
-
-    # El ítem de cochera es un MuiButtonBase-root que contiene un h6 con el número
+    # Obtener todas las cocheras disponibles en la lista
+    cocheras_disponibles = {}
     try:
-        cochera_item = page.locator(f"button.MuiButtonBase-root:has(h6:text-is('{TARGET_SPOT}'))").first
-        cochera_item.scroll_into_view_if_needed()
-        page.wait_for_timeout(800)
-        cochera_item.click()
-        page.wait_for_timeout(1200)
-        cochera_seleccionada = TARGET_SPOT
-        log.info(f"Cochera {TARGET_SPOT} seleccionada ✓")
-    except Exception:
-        log.warning(f"Cochera {TARGET_SPOT} no disponible, buscando alternativa...")
+        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
+        for item in items:
+            try:
+                n = int(item.locator("h6").inner_text().strip())
+                cocheras_disponibles[n] = item
+            except ValueError:
+                continue
+    except Exception as e:
+        log.error(f"Error obteniendo lista de cocheras: {e}")
+        return False
 
-    # Fallback: cochera más cercana
+    if not cocheras_disponibles:
+        log.warning("No hay cocheras disponibles en la lista.")
+        return False
+
+    log.info(f"Cocheras disponibles: {sorted(cocheras_disponibles.keys())}")
+
+    # Seleccionar según orden de prioridad
+    cochera_seleccionada = None
+    elemento_seleccionado = None
+
+    for cochera in COCHERAS_PRIORIDAD:
+        if cochera in cocheras_disponibles:
+            cochera_seleccionada = cochera
+            elemento_seleccionado = cocheras_disponibles[cochera]
+            log.info(f"Cochera preferida disponible: {cochera} ✓")
+            break
+
+    # Si ninguna de las preferidas está disponible, tomar la primera de la lista
     if cochera_seleccionada is None:
-        try:
-            items = page.locator("button.MuiButtonBase-root:has(h6)").all()
-            numeros = []
-            for item in items:
-                try:
-                    n = int(item.locator("h6").inner_text().strip())
-                    numeros.append((n, item))
-                except ValueError:
-                    continue
+        primer_numero = sorted(cocheras_disponibles.keys())[0]
+        cochera_seleccionada = primer_numero
+        elemento_seleccionado = cocheras_disponibles[primer_numero]
+        log.info(f"Ninguna cochera preferida disponible. Reservando la primera: {primer_numero}")
 
-            if not numeros:
-                log.warning("No hay cocheras disponibles en la lista.")
-                return False
+    # Click en la cochera seleccionada
+    elemento_seleccionado.scroll_into_view_if_needed()
+    page.wait_for_timeout(800)
+    elemento_seleccionado.click()
+    page.wait_for_timeout(1200)
+    log.info(f"Cochera {cochera_seleccionada} seleccionada ✓")
 
-            mejor = encontrar_cochera_mas_cercana([n for n, _ in numeros])
-            log.info(f"Reservando cochera más cercana: {mejor}")
-            for n, el in numeros:
-                if n == mejor:
-                    el.scroll_into_view_if_needed()
-                    page.wait_for_timeout(300)
-                    el.click()
-                    page.wait_for_timeout(1200)
-                    cochera_seleccionada = mejor
-                    break
-        except Exception as e:
-            log.error(f"Error buscando alternativa: {e}")
-            return False
-
-    page.wait_for_timeout(1000)
-
-    # Click en RESERVE — botón MuiLoadingButton con texto "Reserve"
+    # Click en RESERVE
     log.info("Haciendo click en RESERVE...")
     try:
         reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
@@ -187,16 +197,12 @@ def main():
     log.info("  Reserva automática de cochera — Parkalot")
     log.info("=" * 60)
 
-    if not dia_siguiente_es_habil():
-        log.info("El día siguiente no requiere reserva. Finalizando.")
+    if not debe_ejecutar_hoy():
+        log.info(f"Hoy ({date.today().strftime('%A')}) no corresponde ejecutar. Finalizando.")
         sys.exit(0)
 
-    manana = date.today() + timedelta(days=1)
-    if manana.weekday() >= 5:
-        log.info("El día siguiente es fin de semana. Finalizando.")
-        sys.exit(0)
-
-    log.info(f"Objetivo: reservar cochera {TARGET_SPOT} para el {fecha_manana_str()}")
+    log.info(f"Objetivo: reservar cochera para el {fecha_manana_str()}")
+    log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
     esperar_hasta_previa_apertura()
 
     with sync_playwright() as p:
@@ -229,8 +235,7 @@ def main():
                     page.reload(wait_until="networkidle")
                     page.wait_for_timeout(1500)
 
-                    details_ok = click_details_del_dia(page)
-                    if not details_ok:
+                    if not click_details_del_dia(page):
                         log.info(f"Reintentando en {INTERVALO_REINTENTO_SEG}s...")
                         time.sleep(INTERVALO_REINTENTO_SEG)
                         continue
