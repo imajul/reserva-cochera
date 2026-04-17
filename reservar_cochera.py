@@ -108,12 +108,13 @@ def seleccionar_y_reservar_cochera(page) -> bool:
 
     cochera_seleccionada = None
 
-    # Buscar cochera objetivo por número exacto en la lista
+    # El ítem de cochera es un MuiButtonBase-root que contiene un h6 con el número
     try:
-        cochera_item = page.locator(f"text='{TARGET_SPOT}'").first
+        cochera_item = page.locator(f"button.MuiButtonBase-root:has(h6:text-is('{TARGET_SPOT}'))").first
         cochera_item.scroll_into_view_if_needed()
-        page.wait_for_timeout(500)
+        page.wait_for_timeout(800)
         cochera_item.click()
+        page.wait_for_timeout(1200)
         cochera_seleccionada = TARGET_SPOT
         log.info(f"Cochera {TARGET_SPOT} seleccionada ✓")
     except Exception:
@@ -122,11 +123,11 @@ def seleccionar_y_reservar_cochera(page) -> bool:
     # Fallback: cochera más cercana
     if cochera_seleccionada is None:
         try:
-            items = page.locator("text=/^\\d+$/").all()
+            items = page.locator("button.MuiButtonBase-root:has(h6)").all()
             numeros = []
             for item in items:
                 try:
-                    n = int(item.inner_text().strip())
+                    n = int(item.locator("h6").inner_text().strip())
                     numeros.append((n, item))
                 except ValueError:
                     continue
@@ -142,6 +143,7 @@ def seleccionar_y_reservar_cochera(page) -> bool:
                     el.scroll_into_view_if_needed()
                     page.wait_for_timeout(300)
                     el.click()
+                    page.wait_for_timeout(1200)
                     cochera_seleccionada = mejor
                     break
         except Exception as e:
@@ -150,11 +152,12 @@ def seleccionar_y_reservar_cochera(page) -> bool:
 
     page.wait_for_timeout(1000)
 
-    # Click en RESERVE
+    # Click en RESERVE — botón MuiLoadingButton con texto "Reserve"
     log.info("Haciendo click en RESERVE...")
     try:
-        page.wait_for_selector("text=RESERVE", timeout=5000)
-        page.get_by_text("RESERVE").first.click()
+        reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
+        reserve_btn.wait_for(timeout=5000)
+        reserve_btn.click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
     except PlaywrightTimeoutError:
