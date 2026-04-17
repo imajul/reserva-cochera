@@ -100,31 +100,27 @@ def seleccionar_y_reservar_cochera(page) -> bool:
 
     cochera_seleccionada = None
 
-    # La lista de cocheras está a la derecha — cada ítem muestra el número
-    # Intentar encontrar directamente por texto exacto del número
+    # El ítem de cochera es un MuiButtonBase-root que contiene un h6 con el número
     try:
-        # Scroll dentro del panel derecho hasta encontrar la cochera
-        # Parkalot muestra cada cochera como un ítem con su número
-        cochera_item = page.locator(
-            f"text='{TARGET_SPOT}'"
-        ).first
+        cochera_item = page.locator(f"button.MuiButtonBase-root:has(h6:text-is('{TARGET_SPOT}'))").first
         cochera_item.scroll_into_view_if_needed()
-        page.wait_for_timeout(500)
+        page.wait_for_timeout(800)
         cochera_item.click()
+        page.wait_for_timeout(1200)
+        page.screenshot(path="test_05b_post_click_cochera.png")
         cochera_seleccionada = TARGET_SPOT
         log.info(f"Cochera {TARGET_SPOT} seleccionada ✓")
-    except Exception:
-        log.warning(f"No se encontró cochera {TARGET_SPOT}, buscando alternativa...")
+    except Exception as e:
+        log.warning(f"No se encontró cochera {TARGET_SPOT}: {e}, buscando alternativa...")
 
     # Si no encontró la cochera objetivo, buscar la más cercana disponible
     if cochera_seleccionada is None:
         try:
-            # Obtener todos los ítems de la lista de cocheras
-            items = page.locator("text=/^\\d+$/").all()
+            items = page.locator("button.MuiButtonBase-root:has(h6)").all()
             numeros = []
             for item in items:
                 try:
-                    n = int(item.inner_text().strip())
+                    n = int(item.locator("h6").inner_text().strip())
                     numeros.append((n, item))
                 except ValueError:
                     continue
@@ -141,6 +137,7 @@ def seleccionar_y_reservar_cochera(page) -> bool:
                     el.scroll_into_view_if_needed()
                     page.wait_for_timeout(300)
                     el.click()
+                    page.wait_for_timeout(1200)
                     cochera_seleccionada = mejor
                     break
         except Exception as e:
@@ -151,11 +148,12 @@ def seleccionar_y_reservar_cochera(page) -> bool:
     page.wait_for_timeout(1000)
     page.screenshot(path="test_06_cochera_seleccionada.png")
 
-    # Click en RESERVE
+    # Click en RESERVE — botón MuiLoadingButton con texto "Reserve"
     log.info("Haciendo click en RESERVE...")
     try:
-        page.wait_for_selector("text=RESERVE", timeout=5000)
-        page.get_by_text("RESERVE").first.click()
+        reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
+        reserve_btn.wait_for(timeout=5000)
+        reserve_btn.click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
     except PlaywrightTimeoutError:
