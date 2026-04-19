@@ -110,6 +110,24 @@ def click_details_del_dia(page) -> bool:
         return False
 
 
+def seleccionar_cochera(cocheras_disponibles: dict):
+    """
+    Elige la cochera según orden de prioridad.
+    Retorna (numero, elemento) o (None, None) si el dict está vacío.
+    """
+    if not cocheras_disponibles:
+        return None, None
+
+    for cochera in COCHERAS_PRIORIDAD:
+        if cochera in cocheras_disponibles:
+            log.info(f"Cochera preferida disponible: {cochera} ✓")
+            return cochera, cocheras_disponibles[cochera]
+
+    primer_numero = sorted(cocheras_disponibles.keys())[0]
+    log.info(f"Ninguna cochera preferida disponible. Reservando la primera: {primer_numero}")
+    return primer_numero, cocheras_disponibles[primer_numero]
+
+
 def seleccionar_y_reservar_cochera(page) -> bool:
     """
     Busca la cochera según orden de prioridad: 237 → 209 → 208 → 238 → primera disponible.
@@ -117,7 +135,6 @@ def seleccionar_y_reservar_cochera(page) -> bool:
     log.info("Obteniendo cocheras disponibles en la lista...")
     page.wait_for_timeout(2000)
 
-    # Obtener todas las cocheras disponibles en la lista
     cocheras_disponibles = {}
     try:
         items = page.locator("button.MuiButtonBase-root:has(h6)").all()
@@ -137,23 +154,7 @@ def seleccionar_y_reservar_cochera(page) -> bool:
 
     log.info(f"Cocheras disponibles: {sorted(cocheras_disponibles.keys())}")
 
-    # Seleccionar según orden de prioridad
-    cochera_seleccionada = None
-    elemento_seleccionado = None
-
-    for cochera in COCHERAS_PRIORIDAD:
-        if cochera in cocheras_disponibles:
-            cochera_seleccionada = cochera
-            elemento_seleccionado = cocheras_disponibles[cochera]
-            log.info(f"Cochera preferida disponible: {cochera} ✓")
-            break
-
-    # Si ninguna de las preferidas está disponible, tomar la primera de la lista
-    if cochera_seleccionada is None:
-        primer_numero = sorted(cocheras_disponibles.keys())[0]
-        cochera_seleccionada = primer_numero
-        elemento_seleccionado = cocheras_disponibles[primer_numero]
-        log.info(f"Ninguna cochera preferida disponible. Reservando la primera: {primer_numero}")
+    cochera_seleccionada, elemento_seleccionado = seleccionar_cochera(cocheras_disponibles)
 
     # Click en la cochera seleccionada
     elemento_seleccionado.scroll_into_view_if_needed()
