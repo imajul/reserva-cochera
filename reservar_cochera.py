@@ -221,10 +221,7 @@ def main():
         try:
             login(page)
 
-            apertura_arg = ahora_arg().replace(
-                hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
-            )
-            limite = apertura_arg + timedelta(minutes=TIMEOUT_ESPERA_MIN)
+            limite = ahora_arg() + timedelta(minutes=TIMEOUT_ESPERA_MIN)
             reservado = False
             intentos = 0
 
