@@ -1,0 +1,4 @@
+playwright
+pytz
+pytest
+pytest-cov
