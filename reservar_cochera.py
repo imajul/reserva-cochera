@@ -21,8 +21,8 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 
 # ─── Configuración ────────────────────────────────────────────────────────────
 PARKALOT_URL    = "https://app.parkalot.io/#/client"
-EMAIL           = os.environ["PARKALOT_EMAIL"]
-PASSWORD        = os.environ["PARKALOT_PASSWORD"]
+EMAIL           = os.environ.get("PARKALOT_EMAIL", "")
+PASSWORD        = os.environ.get("PARKALOT_PASSWORD", "")
 
 # Orden de prioridad de cocheras
 COCHERAS_PRIORIDAD = [237, 209, 208, 238]
