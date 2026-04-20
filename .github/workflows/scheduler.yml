@@ -1,24 +1,22 @@
 name: Reserva Automática Cochera
 
-on:
-  schedule:
-    # 15:55 ARG = 18:55 UTC (UTC-3)
-    # Domingo  (UTC lunes 18:55)  → reserva para el lunes
-    # Lunes    (UTC lunes... no, lunes ARG = lunes UTC si es antes de 21hs)
-    # Cron días: domingo=0, lunes=1, martes=2, jueves=4 en UTC
-    # Como ARG es UTC-3, las 18:55 UTC del domingo = 15:55 ARG del domingo ✓
-    - cron: "55 18 * * 0,1,2,4"   # Dom, Lun, Mar, Jue a las 15:55 ARG
+# El scheduling lo maneja cron-job.org, que llama a este workflow
+# via workflow_dispatch para garantizar puntualidad.
+# Endpoint: POST https://api.github.com/repos/imajul/reserva-cochera/actions/workflows/scheduler.yml/dispatches
+# Body: {"ref": "main", "inputs": {"modo": "produccion"}}
+# Horario: 55 18 * * 0,1,2,4  (18:55 UTC = 15:55 ARG — Dom, Lun, Mar, Jue)
 
+on:
   workflow_dispatch:
     inputs:
       modo:
         description: "Modo de ejecución"
         required: true
-        default: "test"
+        default: "produccion"
         type: choice
         options:
-          - test
           - produccion
+          - test
 
 jobs:
 
@@ -35,9 +33,8 @@ jobs:
       - name: Ejecutar tests unitarios
         run: pytest --cov=reservar_cochera --cov-report=term-missing
 
-  reservar-automatico:
-    name: Reserva automática (cron)
-    if: github.event_name == 'schedule'
+  reservar:
+    name: Reserva (${{ inputs.modo }})
     needs: unit-tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -53,50 +50,18 @@ jobs:
         run: |
           playwright install chromium
           playwright install-deps chromium
-      - name: Ejecutar reserva automática
-        env:
-          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
-          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
-        run: python reservar_cochera.py
-      - name: Subir screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots-auto-${{ github.run_id }}
-          path: "*.png"
-          if-no-files-found: ignore
-          retention-days: 7
-
-  reservar-manual:
-    name: Reserva manual (${{ inputs.modo }})
-    if: github.event_name == 'workflow_dispatch'
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Instalar dependencias
-        run: pip install -r requirements.txt
-      - name: Instalar Chromium
-        run: |
-          playwright install chromium
-          playwright install-deps chromium
-      - name: Ejecutar en modo TEST
-        if: inputs.modo == 'test'
-        env:
-          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
-          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
-        run: python test_reserva.py
       - name: Ejecutar en modo PRODUCCIÓN
         if: inputs.modo == 'produccion'
         env:
           PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
           PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
         run: python reservar_cochera.py
+      - name: Ejecutar en modo TEST
+        if: inputs.modo == 'test'
+        env:
+          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+        run: python test_reserva.py
       - name: Subir screenshots
         if: always()
         uses: actions/upload-artifact@v4
