@@ -77,7 +77,85 @@ GitHub Actions (servidor de ejecución)
 
 ---
 
-## Configuración paso a paso
+## Configuración para quien clona este repositorio
+
+Si alguien te compartió acceso a este repo y querés que funcione en tu cuenta, solo necesitás hacer estas 3 cosas — el código ya está listo.
+
+### 1 — Forkeá el repositorio
+
+1. Entrá al repositorio en GitHub
+2. Click en **"Fork"** (arriba a la derecha)
+3. Seleccioná tu cuenta como destino → **"Create fork"**
+
+> Alternativamente podés clonarlo y subirlo a un nuevo repo privado tuyo.
+
+---
+
+### 2 — Guardá tus credenciales de Parkalot
+
+1. En **tu fork** → **Settings** → **Secrets and variables** → **Actions**
+2. Click en **"New repository secret"** y creá estos dos con tus propios datos:
+
+| Nombre exacto        | Valor                      |
+|---------------------|---------------------------|
+| `PARKALOT_EMAIL`    | Tu email de Parkalot      |
+| `PARKALOT_PASSWORD` | Tu contraseña de Parkalot |
+
+---
+
+### 3 — Configurá tu propio cron-job.org
+
+Necesitás tu propio scheduler porque el de quien te compartió el repo apunta a su repositorio, no al tuyo.
+
+#### 3a — Crear un GitHub Personal Access Token
+
+1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
+2. Click en **"Generate new token"**
+3. Completá:
+   - **Token name:** `cron-job-reserva-cochera`
+   - **Expiration:** 1 año
+   - **Repository access:** Only select repositories → tu fork de `reserva-cochera`
+   - **Permissions → Repository permissions → Actions:** `Read and write`
+4. Click en **"Generate token"** y guardalo (se muestra una sola vez)
+
+#### 3b — Crear el cron en cron-job.org
+
+1. Creá una cuenta gratuita en [cron-job.org](https://cron-job.org)
+2. Click en **"Create cronjob"** y completá:
+
+| Campo | Valor |
+|-------|-------|
+| **URL** | `https://api.github.com/repos/TU_USUARIO/reserva-cochera/actions/workflows/scheduler.yml/dispatches` |
+| **Método** | `POST` |
+| **Horario** | `55 18 * * 0,1,2,4` |
+
+3. En **Headers**, agregá estos tres:
+
+| Key | Value |
+|-----|-------|
+| `Authorization` | `Bearer TU_TOKEN` |
+| `Content-Type` | `application/json` |
+| `Accept` | `application/vnd.github.v3+json` |
+
+4. En **Request body**:
+```json
+{"ref": "main", "inputs": {"modo": "produccion"}}
+```
+
+5. Click en **"Create"** y probá con **"Run now"** → debe responder `204 No Content`
+
+#### 3c — Verificar que todo funciona
+
+1. Ir a la pestaña **Actions** de tu fork
+2. Click en **"Reserva Automática Cochera"** → **"Run workflow"**
+3. Elegir **`test`** y click en el botón verde
+4. Esperá ~2 minutos:
+   - ✅ Verde = todo configurado correctamente
+   - ❌ Rojo = revisá que los Secrets estén bien cargados
+
+---
+
+## Configuración desde cero
 
 ### Paso 1 — Crear cuenta en GitHub
 Si no tenés, creá una gratis en [github.com](https://github.com).
