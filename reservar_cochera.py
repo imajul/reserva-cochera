@@ -187,15 +187,23 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
     try:
         reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
         reserve_btn.wait_for(timeout=5000)
-        screenshot(page, f"{prefix}_pre_reserve")
-        reserve_btn.click()
-        page.wait_for_load_state("networkidle")
-        page.wait_for_timeout(2000)
-        screenshot(page, f"{prefix}_post_reserve")
     except PlaywrightTimeoutError:
         log.error("No se encontró el botón RESERVE.")
         screenshot(page, f"{prefix}_sin_reserve")
         return False
+
+    screenshot(page, f"{prefix}_pre_reserve")
+    reserve_btn.click()
+    log.info("Click en RESERVE ejecutado ✓")
+
+    # Esperar resultado — networkidle puede no alcanzarse si hay animaciones,
+    # por eso usamos domcontentloaded con fallback a timeout fijo.
+    try:
+        page.wait_for_load_state("domcontentloaded", timeout=10000)
+    except PlaywrightTimeoutError:
+        pass
+    page.wait_for_timeout(3000)
+    screenshot(page, f"{prefix}_post_reserve")
 
     # Confirmar popup si aparece
     try:
@@ -256,7 +264,7 @@ def main():
                 log.info(f"[Intento #{intentos} — {ahora_arg().strftime('%H:%M:%S')} ARG]")
 
                 try:
-                    page.reload(wait_until="networkidle")
+                    page.goto(PARKALOT_URL, wait_until="networkidle")
                     page.wait_for_timeout(1500)
                     screenshot(page, f"intento_{intentos:02d}_home")
 
