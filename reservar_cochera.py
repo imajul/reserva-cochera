@@ -15,7 +15,7 @@ import os
 import sys
 import time
 import logging
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 import pytz
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
@@ -49,10 +49,10 @@ def ahora_arg() -> datetime:
     return datetime.now(TZ_ARG)
 
 def debe_ejecutar_hoy() -> bool:
-    return date.today().weekday() in DIAS_EJECUCION
+    return ahora_arg().date().weekday() in DIAS_EJECUCION
 
 def fecha_manana_str() -> str:
-    return (date.today() + timedelta(days=1)).strftime("%Y-%m-%d")
+    return (ahora_arg().date() + timedelta(days=1)).strftime("%Y-%m-%d")
 
 def esperar_hasta_previa_apertura():
     ahora = ahora_arg()
@@ -64,11 +64,20 @@ def esperar_hasta_previa_apertura():
         time.sleep(espera_seg)
     log.info("Entrando en modo de espera activa...")
 
+def screenshot(page, nombre: str):
+    path = f"{nombre}.png"
+    try:
+        page.screenshot(path=path, full_page=True)
+        log.info(f"📸 Screenshot: {path}")
+    except Exception as e:
+        log.warning(f"No se pudo guardar screenshot {path}: {e}")
+
 
 def login(page):
     log.info("Navegando a Parkalot...")
     page.goto(PARKALOT_URL, wait_until="networkidle")
     page.wait_for_timeout(2000)
+    screenshot(page, "01_login_form")
 
     log.info("Iniciando sesión...")
     page.locator(
@@ -84,29 +93,34 @@ def login(page):
     ).first.click()
     page.wait_for_load_state("networkidle")
     page.wait_for_timeout(2000)
+    screenshot(page, "02_post_login")
     log.info("Sesión iniciada ✓")
 
 
-def click_details_del_dia(page) -> bool:
+def click_details_del_dia(page, intento: int = 0) -> bool:
     """
     Hace click en el SEGUNDO botón DETAILS (el del día siguiente).
     Cuando hay dos tarjetas visibles, la primera es el día de hoy
     y la segunda es el día siguiente.
     """
+    prefix = f"intento_{intento:02d}"
     log.info("Buscando botones DETAILS...")
     page.wait_for_timeout(1500)
     try:
         page.wait_for_selector("text=DETAILS", timeout=8000)
         details_btns = page.get_by_text("DETAILS").all()
         log.info(f"Botones DETAILS encontrados: {len(details_btns)}")
+        screenshot(page, f"{prefix}_details_encontrado")
         # Siempre clickear el último (el del día siguiente)
         details_btns[-1].click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
+        screenshot(page, f"{prefix}_post_details")
         log.info("Click en DETAILS del día siguiente ✓")
         return True
     except PlaywrightTimeoutError:
         log.warning("No se encontró el botón DETAILS — las reservas aún no están habilitadas.")
+        screenshot(page, f"{prefix}_sin_details")
         return False
 
 
@@ -128,12 +142,14 @@ def seleccionar_cochera(cocheras_disponibles: dict):
     return primer_numero, cocheras_disponibles[primer_numero]
 
 
-def seleccionar_y_reservar_cochera(page) -> bool:
+def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
     """
     Busca la cochera según orden de prioridad: 237 → 209 → 208 → 238 → primera disponible.
     """
+    prefix = f"intento_{intento:02d}"
     log.info("Obteniendo cocheras disponibles en la lista...")
     page.wait_for_timeout(2000)
+    screenshot(page, f"{prefix}_mapa")
 
     cocheras_disponibles = {}
     try:
@@ -146,10 +162,12 @@ def seleccionar_y_reservar_cochera(page) -> bool:
                 continue
     except Exception as e:
         log.error(f"Error obteniendo lista de cocheras: {e}")
+        screenshot(page, f"{prefix}_error_lista")
         return False
 
     if not cocheras_disponibles:
         log.warning("No hay cocheras disponibles en la lista.")
+        screenshot(page, f"{prefix}_sin_cocheras")
         return False
 
     log.info(f"Cocheras disponibles: {sorted(cocheras_disponibles.keys())}")
@@ -161,6 +179,7 @@ def seleccionar_y_reservar_cochera(page) -> bool:
     page.wait_for_timeout(800)
     elemento_seleccionado.click()
     page.wait_for_timeout(1200)
+    screenshot(page, f"{prefix}_cochera_seleccionada")
     log.info(f"Cochera {cochera_seleccionada} seleccionada ✓")
 
     # Click en RESERVE
@@ -168,11 +187,14 @@ def seleccionar_y_reservar_cochera(page) -> bool:
     try:
         reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
         reserve_btn.wait_for(timeout=5000)
+        screenshot(page, f"{prefix}_pre_reserve")
         reserve_btn.click()
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
+        screenshot(page, f"{prefix}_post_reserve")
     except PlaywrightTimeoutError:
         log.error("No se encontró el botón RESERVE.")
+        screenshot(page, f"{prefix}_sin_reserve")
         return False
 
     # Confirmar popup si aparece
@@ -184,11 +206,12 @@ def seleccionar_y_reservar_cochera(page) -> bool:
         confirm.wait_for(timeout=3000)
         confirm.click()
         page.wait_for_timeout(1500)
+        screenshot(page, f"{prefix}_confirmacion")
         log.info("Confirmación adicional aceptada ✓")
     except PlaywrightTimeoutError:
         pass
 
-    page.screenshot(path="resultado_reserva.png")
+    screenshot(page, "resultado_reserva")
     log.info(f"✅ Reserva exitosa — Cochera {cochera_seleccionada}")
     return True
 
@@ -198,8 +221,11 @@ def main():
     log.info("  Reserva automática de cochera — Parkalot")
     log.info("=" * 60)
 
+    ahora = ahora_arg()
+    log.info(f"Hora actual ARG: {ahora.strftime('%A %Y-%m-%d %H:%M:%S')}")
+
     if not debe_ejecutar_hoy():
-        log.info(f"Hoy ({date.today().strftime('%A')}) no corresponde ejecutar. Finalizando.")
+        log.info(f"Hoy ({ahora.strftime('%A')}) no corresponde ejecutar. Finalizando.")
         sys.exit(0)
 
     log.info(f"Objetivo: reservar cochera para el {fecha_manana_str()}")
@@ -232,15 +258,17 @@ def main():
                 try:
                     page.reload(wait_until="networkidle")
                     page.wait_for_timeout(1500)
+                    screenshot(page, f"intento_{intentos:02d}_home")
 
-                    if not click_details_del_dia(page):
+                    if not click_details_del_dia(page, intentos):
                         log.info(f"Reintentando en {INTERVALO_REINTENTO_SEG}s...")
                         time.sleep(INTERVALO_REINTENTO_SEG)
                         continue
 
-                    reservado = seleccionar_y_reservar_cochera(page)
+                    reservado = seleccionar_y_reservar_cochera(page, intentos)
                 except Exception as e:
                     log.warning(f"Error en intento #{intentos}: {e}")
+                    screenshot(page, f"intento_{intentos:02d}_error")
 
                 if reservado:
                     break
@@ -250,13 +278,13 @@ def main():
 
             if not reservado:
                 log.error(f"❌ No se pudo reservar luego de {intentos} intentos.")
-                page.screenshot(path="error_reserva.png")
+                screenshot(page, "error_reserva")
                 sys.exit(1)
 
         except Exception as e:
             log.exception(f"Error inesperado: {e}")
             try:
-                page.screenshot(path="error_reserva.png")
+                screenshot(page, "error_reserva")
             except Exception:
                 pass
             sys.exit(1)
