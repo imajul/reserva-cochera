@@ -29,6 +29,11 @@ class TestAhoraArg:
 # ─── debe_ejecutar_hoy ────────────────────────────────────────────────────────
 
 class TestDebeEjecutarHoy:
+    TZ = pytz.timezone("America/Argentina/Buenos_Aires")
+
+    def _dt(self, fecha):
+        return datetime(fecha.year, fecha.month, fecha.day, 12, 0, 0, tzinfo=self.TZ)
+
     @pytest.mark.parametrize("fecha,esperado", [
         (date(2024, 3, 18), True),   # lunes   (0)
         (date(2024, 3, 19), True),   # martes  (1)
@@ -39,31 +44,32 @@ class TestDebeEjecutarHoy:
         (date(2024, 3, 24), True),   # domingo (6)
     ])
     def test_dias_ejecucion(self, fecha, esperado):
-        with patch("reservar_cochera.date") as mock_date:
-            mock_date.today.return_value = fecha
+        with patch("reservar_cochera.ahora_arg", return_value=self._dt(fecha)):
             assert rc.debe_ejecutar_hoy() == esperado
 
 
 # ─── fecha_manana_str ─────────────────────────────────────────────────────────
 
 class TestFechaMañanaStr:
+    TZ = pytz.timezone("America/Argentina/Buenos_Aires")
+
+    def _dt(self, year, month, day):
+        return datetime(year, month, day, 12, 0, 0, tzinfo=self.TZ)
+
     def test_formato_yyyy_mm_dd(self):
         result = rc.fecha_manana_str()
         assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", result)
 
     def test_es_manana(self):
-        with patch("reservar_cochera.date") as mock_date:
-            mock_date.today.return_value = date(2024, 3, 15)
+        with patch("reservar_cochera.ahora_arg", return_value=self._dt(2024, 3, 15)):
             assert rc.fecha_manana_str() == "2024-03-16"
 
     def test_cruce_de_mes(self):
-        with patch("reservar_cochera.date") as mock_date:
-            mock_date.today.return_value = date(2024, 1, 31)
+        with patch("reservar_cochera.ahora_arg", return_value=self._dt(2024, 1, 31)):
             assert rc.fecha_manana_str() == "2024-02-01"
 
     def test_cruce_de_ano(self):
-        with patch("reservar_cochera.date") as mock_date:
-            mock_date.today.return_value = date(2023, 12, 31)
+        with patch("reservar_cochera.ahora_arg", return_value=self._dt(2023, 12, 31)):
             assert rc.fecha_manana_str() == "2024-01-01"
 
 
