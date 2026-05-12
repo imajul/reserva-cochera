@@ -144,7 +144,9 @@ def seleccionar_cochera(cocheras_disponibles: dict):
 
 def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
     """
-    Busca la cochera según orden de prioridad: 237 → 209 → 208 → 238 → primera disponible.
+    Itera las cocheras en orden de prioridad y reserva la primera disponible.
+    Si el botón RESERVE está deshabilitado (cochera ya reservada), pasa a la siguiente
+    inmediatamente sin esperar ningún timeout.
     """
     prefix = f"intento_{intento:02d}"
     log.info("Obteniendo cocheras disponibles en la lista...")
@@ -170,58 +172,73 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         screenshot(page, f"{prefix}_sin_cocheras")
         return False
 
-    log.info(f"Cocheras disponibles: {sorted(cocheras_disponibles.keys())}")
+    log.info(f"Cocheras en lista: {sorted(cocheras_disponibles.keys())}")
 
-    cochera_seleccionada, elemento_seleccionado = seleccionar_cochera(cocheras_disponibles)
+    # Orden: primero las prioritarias, luego el resto ordenadas
+    cocheras_a_intentar = [c for c in COCHERAS_PRIORIDAD if c in cocheras_disponibles]
+    for c in sorted(cocheras_disponibles.keys()):
+        if c not in cocheras_a_intentar:
+            cocheras_a_intentar.append(c)
+    log.info(f"Orden de intentos: {cocheras_a_intentar}")
 
-    # Click en la cochera seleccionada
-    elemento_seleccionado.scroll_into_view_if_needed()
-    page.wait_for_timeout(800)
-    elemento_seleccionado.click()
-    page.wait_for_timeout(1200)
-    screenshot(page, f"{prefix}_cochera_seleccionada")
-    log.info(f"Cochera {cochera_seleccionada} seleccionada ✓")
+    for cochera_num in cocheras_a_intentar:
+        elemento = cocheras_disponibles[cochera_num]
+        log.info(f"Seleccionando cochera {cochera_num}...")
 
-    # Click en RESERVE
-    log.info("Haciendo click en RESERVE...")
-    try:
-        reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
-        reserve_btn.wait_for(timeout=5000)
-    except PlaywrightTimeoutError:
-        log.error("No se encontró el botón RESERVE.")
-        screenshot(page, f"{prefix}_sin_reserve")
-        return False
-
-    screenshot(page, f"{prefix}_pre_reserve")
-    reserve_btn.click()
-    log.info("Click en RESERVE ejecutado ✓")
-
-    # Esperar resultado — networkidle puede no alcanzarse si hay animaciones,
-    # por eso usamos domcontentloaded con fallback a timeout fijo.
-    try:
-        page.wait_for_load_state("domcontentloaded", timeout=10000)
-    except PlaywrightTimeoutError:
-        pass
-    page.wait_for_timeout(3000)
-    screenshot(page, f"{prefix}_post_reserve")
-
-    # Confirmar popup si aparece
-    try:
-        confirm = page.locator(
-            "button:has-text('Confirm'), button:has-text('OK'), "
-            "button:has-text('Yes'), button:has-text('Aceptar')"
-        ).first
-        confirm.wait_for(timeout=3000)
-        confirm.click()
+        elemento.scroll_into_view_if_needed()
+        page.wait_for_timeout(500)
+        elemento.click()
         page.wait_for_timeout(1500)
-        screenshot(page, f"{prefix}_confirmacion")
-        log.info("Confirmación adicional aceptada ✓")
-    except PlaywrightTimeoutError:
-        pass
+        screenshot(page, f"{prefix}_cochera_{cochera_num}_sel")
 
-    screenshot(page, "resultado_reserva")
-    log.info(f"✅ Reserva exitosa — Cochera {cochera_seleccionada}")
-    return True
+        # Verificar si el botón RESERVE existe y está habilitado
+        reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
+        try:
+            reserve_btn.wait_for(timeout=3000)
+        except PlaywrightTimeoutError:
+            log.warning(f"Cochera {cochera_num}: botón RESERVE no encontrado. Siguiente...")
+            screenshot(page, f"{prefix}_cochera_{cochera_num}_sin_reserve")
+            continue
+
+        if not reserve_btn.is_enabled():
+            log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
+            screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
+            continue
+
+        # Cochera disponible — reservar
+        log.info(f"Cochera {cochera_num} disponible — reservando...")
+        screenshot(page, f"{prefix}_pre_reserve_{cochera_num}")
+        reserve_btn.click()
+        log.info("Click en RESERVE ✓")
+
+        try:
+            page.wait_for_load_state("domcontentloaded", timeout=10000)
+        except PlaywrightTimeoutError:
+            pass
+        page.wait_for_timeout(3000)
+        screenshot(page, f"{prefix}_post_reserve_{cochera_num}")
+
+        # Confirmar popup si aparece
+        try:
+            confirm = page.locator(
+                "button:has-text('Confirm'), button:has-text('OK'), "
+                "button:has-text('Yes'), button:has-text('Aceptar')"
+            ).first
+            confirm.wait_for(timeout=3000)
+            confirm.click()
+            page.wait_for_timeout(1500)
+            screenshot(page, f"{prefix}_confirmacion_{cochera_num}")
+            log.info("Confirmación adicional aceptada ✓")
+        except PlaywrightTimeoutError:
+            pass
+
+        screenshot(page, "resultado_reserva")
+        log.info(f"✅ Reserva exitosa — Cochera {cochera_num}")
+        return True
+
+    log.warning("Se intentaron todas las cocheras disponibles — todas ocupadas.")
+    screenshot(page, f"{prefix}_todas_ocupadas")
+    return False
 
 
 def main():
