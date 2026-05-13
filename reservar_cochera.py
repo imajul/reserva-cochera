@@ -15,6 +15,8 @@ import os
 import sys
 import time
 import logging
+import urllib.request
+import urllib.parse
 from datetime import datetime, timedelta
 import pytz
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
@@ -23,6 +25,10 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 PARKALOT_URL    = "https://app.parkalot.io/#/client"
 EMAIL           = os.environ.get("PARKALOT_EMAIL", "")
 PASSWORD        = os.environ.get("PARKALOT_PASSWORD", "")
+
+# Notificaciones WhatsApp vía CallMeBot (opcional)
+WHATSAPP_PHONE  = os.environ.get("WHATSAPP_PHONE", "")   # Ej: 5491112345678
+WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 
 # Orden de prioridad de cocheras
 COCHERAS_PRIORIDAD = [237, 209, 208, 238]
@@ -47,6 +53,21 @@ log = logging.getLogger(__name__)
 
 def ahora_arg() -> datetime:
     return datetime.now(TZ_ARG)
+
+def enviar_whatsapp(mensaje: str):
+    if not WHATSAPP_PHONE or not WHATSAPP_APIKEY:
+        log.info("WhatsApp no configurado — omitiendo notificación.")
+        return
+    try:
+        texto = urllib.parse.quote(mensaje)
+        url = (
+            f"https://api.callmebot.com/whatsapp.php"
+            f"?phone={WHATSAPP_PHONE}&text={texto}&apikey={WHATSAPP_APIKEY}"
+        )
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            log.info(f"📲 WhatsApp enviado ✓ (status {resp.status})")
+    except Exception as e:
+        log.warning(f"No se pudo enviar WhatsApp: {e}")
 
 def debe_ejecutar_hoy() -> bool:
     return ahora_arg().date().weekday() in DIAS_EJECUCION
@@ -105,7 +126,7 @@ def click_details_del_dia(page, intento: int = 0) -> bool:
     """
     prefix = f"intento_{intento:02d}"
     log.info("Buscando botones DETAILS...")
-    page.wait_for_timeout(1500)
+    page.wait_for_timeout(300)
     try:
         page.wait_for_selector("text=DETAILS", timeout=8000)
         details_btns = page.get_by_text("DETAILS").all()
@@ -113,8 +134,8 @@ def click_details_del_dia(page, intento: int = 0) -> bool:
         screenshot(page, f"{prefix}_details_encontrado")
         # Siempre clickear el último (el del día siguiente)
         details_btns[-1].click()
-        page.wait_for_load_state("networkidle")
-        page.wait_for_timeout(2000)
+        page.wait_for_load_state("domcontentloaded")
+        page.wait_for_timeout(500)
         screenshot(page, f"{prefix}_post_details")
         log.info("Click en DETAILS del día siguiente ✓")
         return True
@@ -150,7 +171,7 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
     """
     prefix = f"intento_{intento:02d}"
     log.info("Obteniendo cocheras disponibles en la lista...")
-    page.wait_for_timeout(2000)
+    page.wait_for_timeout(300)
     screenshot(page, f"{prefix}_mapa")
 
     cocheras_disponibles = {}
@@ -186,9 +207,8 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         log.info(f"Seleccionando cochera {cochera_num}...")
 
         elemento.scroll_into_view_if_needed()
-        page.wait_for_timeout(500)
         elemento.click()
-        page.wait_for_timeout(1500)
+        page.wait_for_timeout(200)
         screenshot(page, f"{prefix}_cochera_{cochera_num}_sel")
 
         # Verificar si el botón RESERVE existe y está habilitado
@@ -234,6 +254,9 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
         screenshot(page, "resultado_reserva")
         log.info(f"✅ Reserva exitosa — Cochera {cochera_num}")
+        enviar_whatsapp(
+            f"✅ Cochera {cochera_num} reservada para el {fecha_manana_str()} 🚗"
+        )
         return True
 
     log.warning("Se intentaron todas las cocheras disponibles — todas ocupadas.")
@@ -272,6 +295,20 @@ def main():
         try:
             login(page)
 
+            # Pre-posicionarse en el mapa antes de las 16:00
+            en_mapa = False
+            url_mapa = None
+            log.info("Intentando pre-cargar el mapa de cocheras...")
+            try:
+                if click_details_del_dia(page, 0):
+                    en_mapa = True
+                    url_mapa = page.url
+                    log.info(f"Pre-posicionado en el mapa ✓")
+                else:
+                    log.info("Mapa aún no disponible — se cargará en el loop principal.")
+            except Exception:
+                pass
+
             limite = ahora_arg() + timedelta(minutes=TIMEOUT_ESPERA_MIN)
             reservado = False
             intentos = 0
@@ -281,29 +318,49 @@ def main():
                 log.info(f"[Intento #{intentos} — {ahora_arg().strftime('%H:%M:%S')} ARG]")
 
                 try:
-                    page.goto(PARKALOT_URL, wait_until="networkidle")
-                    page.wait_for_timeout(1500)
-                    screenshot(page, f"intento_{intentos:02d}_home")
+                    if en_mapa and url_mapa:
+                        log.info("Recargando mapa de cocheras...")
+                        page.goto(url_mapa, wait_until="domcontentloaded")
+                        page.wait_for_timeout(300)
+                        screenshot(page, f"intento_{intentos:02d}_reload")
+                    else:
+                        page.goto(PARKALOT_URL, wait_until="networkidle")
+                        page.wait_for_timeout(300)
+                        screenshot(page, f"intento_{intentos:02d}_home")
 
-                    if not click_details_del_dia(page, intentos):
-                        log.info(f"Reintentando en {INTERVALO_REINTENTO_SEG}s...")
-                        time.sleep(INTERVALO_REINTENTO_SEG)
-                        continue
+                        if not click_details_del_dia(page, intentos):
+                            log.info(f"Reintentando en {INTERVALO_REINTENTO_SEG}s...")
+                            time.sleep(INTERVALO_REINTENTO_SEG)
+                            continue
+
+                        en_mapa = True
+                        url_mapa = page.url
 
                     reservado = seleccionar_y_reservar_cochera(page, intentos)
                 except Exception as e:
                     log.warning(f"Error en intento #{intentos}: {e}")
                     screenshot(page, f"intento_{intentos:02d}_error")
+                    en_mapa = False
+                    url_mapa = None
 
                 if reservado:
                     break
 
-                log.info(f"Reintentando en {INTERVALO_REINTENTO_SEG}s...")
-                time.sleep(INTERVALO_REINTENTO_SEG)
+                ahora_actual = ahora_arg()
+                apertura = ahora_actual.replace(
+                    hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
+                )
+                intervalo = 1 if ahora_actual >= apertura else INTERVALO_REINTENTO_SEG
+                log.info(f"Reintentando en {intervalo}s...")
+                time.sleep(intervalo)
 
             if not reservado:
                 log.error(f"❌ No se pudo reservar luego de {intentos} intentos.")
                 screenshot(page, "error_reserva")
+                enviar_whatsapp(
+                    f"❌ No se pudo reservar cochera para el {fecha_manana_str()}. "
+                    f"Revisá el log en GitHub Actions."
+                )
                 sys.exit(1)
 
         except Exception as e:
@@ -312,6 +369,10 @@ def main():
                 screenshot(page, "error_reserva")
             except Exception:
                 pass
+            enviar_whatsapp(
+                f"❌ Error inesperado al reservar cochera para el {fecha_manana_str()}. "
+                f"Revisá el log en GitHub Actions."
+            )
             sys.exit(1)
         finally:
             browser.close()
