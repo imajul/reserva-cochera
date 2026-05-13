@@ -57,6 +57,8 @@ jobs:
         env:
           PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
           PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+          WHATSAPP_PHONE:    ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY:   ${{ secrets.WHATSAPP_APIKEY }}
         run: python reservar_cochera.py
       - name: Subir screenshots
         if: always()
@@ -90,12 +92,16 @@ jobs:
         env:
           PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
           PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+          WHATSAPP_PHONE:    ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY:   ${{ secrets.WHATSAPP_APIKEY }}
         run: python test_reserva.py
       - name: Ejecutar en modo PRODUCCIÓN
         if: inputs.modo == 'produccion'
         env:
           PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
           PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+          WHATSAPP_PHONE:    ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY:   ${{ secrets.WHATSAPP_APIKEY }}
         run: python reservar_cochera.py
       - name: Subir screenshots
         if: always()

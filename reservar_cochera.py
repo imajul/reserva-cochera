@@ -15,6 +15,8 @@ import os
 import sys
 import time
 import logging
+import urllib.request
+import urllib.parse
 from datetime import datetime, timedelta
 import pytz
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
@@ -23,6 +25,10 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 PARKALOT_URL    = "https://app.parkalot.io/#/client"
 EMAIL           = os.environ.get("PARKALOT_EMAIL", "")
 PASSWORD        = os.environ.get("PARKALOT_PASSWORD", "")
+
+# Notificaciones WhatsApp vía CallMeBot (opcional)
+WHATSAPP_PHONE  = os.environ.get("WHATSAPP_PHONE", "")   # Ej: 5491112345678
+WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 
 # Orden de prioridad de cocheras
 COCHERAS_PRIORIDAD = [237, 209, 208, 238]
@@ -47,6 +53,21 @@ log = logging.getLogger(__name__)
 
 def ahora_arg() -> datetime:
     return datetime.now(TZ_ARG)
+
+def enviar_whatsapp(mensaje: str):
+    if not WHATSAPP_PHONE or not WHATSAPP_APIKEY:
+        log.info("WhatsApp no configurado — omitiendo notificación.")
+        return
+    try:
+        texto = urllib.parse.quote(mensaje)
+        url = (
+            f"https://api.callmebot.com/whatsapp.php"
+            f"?phone={WHATSAPP_PHONE}&text={texto}&apikey={WHATSAPP_APIKEY}"
+        )
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            log.info(f"📲 WhatsApp enviado ✓ (status {resp.status})")
+    except Exception as e:
+        log.warning(f"No se pudo enviar WhatsApp: {e}")
 
 def debe_ejecutar_hoy() -> bool:
     return ahora_arg().date().weekday() in DIAS_EJECUCION
@@ -233,6 +254,9 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
         screenshot(page, "resultado_reserva")
         log.info(f"✅ Reserva exitosa — Cochera {cochera_num}")
+        enviar_whatsapp(
+            f"✅ Cochera {cochera_num} reservada para el {fecha_manana_str()} 🚗"
+        )
         return True
 
     log.warning("Se intentaron todas las cocheras disponibles — todas ocupadas.")
@@ -333,6 +357,10 @@ def main():
             if not reservado:
                 log.error(f"❌ No se pudo reservar luego de {intentos} intentos.")
                 screenshot(page, "error_reserva")
+                enviar_whatsapp(
+                    f"❌ No se pudo reservar cochera para el {fecha_manana_str()}. "
+                    f"Revisá el log en GitHub Actions."
+                )
                 sys.exit(1)
 
         except Exception as e:
@@ -341,6 +369,10 @@ def main():
                 screenshot(page, "error_reserva")
             except Exception:
                 pass
+            enviar_whatsapp(
+                f"❌ Error inesperado al reservar cochera para el {fecha_manana_str()}. "
+                f"Revisá el log en GitHub Actions."
+            )
             sys.exit(1)
         finally:
             browser.close()
