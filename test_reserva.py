@@ -10,7 +10,8 @@ from playwright.sync_api import sync_playwright
 
 from reservar_cochera import (
     PARKALOT_URL, COCHERAS_PRIORIDAD,
-    login, click_details_del_dia, seleccionar_y_reservar_cochera, fecha_manana_str,
+    login, click_details_del_dia, seleccionar_y_reservar_cochera,
+    fecha_manana_str, enviar_whatsapp,
 )
 
 logging.basicConfig(
@@ -41,6 +42,7 @@ def main():
         page = context.new_page()
 
         try:
+            enviar_whatsapp(f"🧪 Test de notificación activo — reserva para el {fecha_manana_str()}")
             login(page)
             page.screenshot(path="test_01_post_login.png")
 
