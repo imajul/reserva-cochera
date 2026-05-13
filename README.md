@@ -1,6 +1,6 @@
 # 🚗 Reserva Automática de Cochera — Parkalot
 
-Sistema que reserva automáticamente cocheras en Parkalot cada día hábil a las **16:00 (hora Argentina)**, usando **GitHub Actions** como servidor gratuito en la nube.
+Sistema que reserva automáticamente cocheras en Parkalot cada día hábil a las **16:00 (hora Argentina)**, usando **cron-job.org** como scheduler externo y **GitHub Actions** como servidor de ejecución.
 
 ---
 
@@ -28,7 +28,7 @@ Sistema que reserva automáticamente cocheras en Parkalot cada día hábil a las
 - Espera activamente hasta las **16:00** en que se habilitan las reservas
 - En cuanto se habilitan, intenta reservar según el orden de prioridad
 - Si aparecen dos tarjetas de días (hoy + mañana), siempre selecciona la del **día siguiente**
-- Reintenta cada 5 segundos hasta las 16:10 si la reserva aún no está disponible
+- Reintenta cada 5 segundos durante 10 minutos si la reserva aún no está disponible
 
 ---
 
@@ -38,14 +38,124 @@ Sistema que reserva automáticamente cocheras en Parkalot cada día hábil a las
 reserva-cochera/
 ├── reservar_cochera.py          → Script principal (producción)
 ├── test_reserva.py              → Script de prueba (reserva inmediata, sin esperar 16:00)
+├── requirements.txt             → Dependencias Python
+├── pytest.ini                   → Configuración de tests
+├── tests/
+│   ├── conftest.py              → Mock de Playwright para tests unitarios
+│   └── test_unit.py             → 26 tests unitarios
 └── .github/
     └── workflows/
-        └── scheduler.yml        → Programación automática en GitHub Actions
+        └── scheduler.yml        → Workflow de GitHub Actions
 ```
 
 ---
 
-## Configuración paso a paso
+## Arquitectura del sistema
+
+```
+cron-job.org (scheduler externo — puntualidad garantizada)
+│
+│  Dom/Lun/Mar/Jue a las 18:55 UTC (15:55 ARG)
+│  POST https://api.github.com/repos/.../actions/workflows/scheduler.yml/dispatches
+│
+▼
+GitHub Actions (servidor de ejecución)
+│
+├── Job: Tests unitarios (26 tests — gate de calidad)
+│
+└── Job: Reserva (modo produccion / test)
+    └── reservar_cochera.py
+        ├── 15:55 → Login en Parkalot
+        ├── 15:55–16:00 → Espera activa
+        ├── 16:00 → Click en DETAILS del día siguiente
+        ├── Busca cocheras: 237 → 209 → 208 → 238 → primera disponible
+        └── Click en RESERVE → Confirmación
+```
+
+> **¿Por qué cron-job.org y no el cron interno de GitHub Actions?**
+> GitHub Actions puede demorar 30–60 minutos en ejecutar un cron programado bajo alta carga. Como la ventana de reserva de Parkalot abre exactamente a las 16:00, cualquier demora significa perder el turno. cron-job.org garantiza la llamada puntual al minuto.
+
+---
+
+## Configuración para quien clona este repositorio
+
+Si alguien te compartió acceso a este repo y querés que funcione en tu cuenta, solo necesitás hacer estas 3 cosas — el código ya está listo.
+
+### 1 — Forkeá el repositorio
+
+1. Entrá al repositorio en GitHub
+2. Click en **"Fork"** (arriba a la derecha)
+3. Seleccioná tu cuenta como destino → **"Create fork"**
+
+> Alternativamente podés clonarlo y subirlo a un nuevo repo privado tuyo.
+
+---
+
+### 2 — Guardá tus credenciales de Parkalot
+
+1. En **tu fork** → **Settings** → **Secrets and variables** → **Actions**
+2. Click en **"New repository secret"** y creá estos dos con tus propios datos:
+
+| Nombre exacto        | Valor                      |
+|---------------------|---------------------------|
+| `PARKALOT_EMAIL`    | Tu email de Parkalot      |
+| `PARKALOT_PASSWORD` | Tu contraseña de Parkalot |
+
+---
+
+### 3 — Configurá tu propio cron-job.org
+
+Necesitás tu propio scheduler porque el de quien te compartió el repo apunta a su repositorio, no al tuyo.
+
+#### 3a — Crear un GitHub Personal Access Token
+
+1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
+2. Click en **"Generate new token"**
+3. Completá:
+   - **Token name:** `cron-job-reserva-cochera`
+   - **Expiration:** 1 año
+   - **Repository access:** Only select repositories → tu fork de `reserva-cochera`
+   - **Permissions → Repository permissions → Actions:** `Read and write`
+4. Click en **"Generate token"** y guardalo (se muestra una sola vez)
+
+#### 3b — Crear el cron en cron-job.org
+
+1. Creá una cuenta gratuita en [cron-job.org](https://cron-job.org)
+2. Click en **"Create cronjob"** y completá:
+
+| Campo | Valor |
+|-------|-------|
+| **URL** | `https://api.github.com/repos/TU_USUARIO/reserva-cochera/actions/workflows/scheduler.yml/dispatches` |
+| **Método** | `POST` |
+| **Horario** | `55 18 * * 0,1,2,4` |
+
+3. En **Headers**, agregá estos tres:
+
+| Key | Value |
+|-----|-------|
+| `Authorization` | `Bearer TU_TOKEN` |
+| `Content-Type` | `application/json` |
+| `Accept` | `application/vnd.github.v3+json` |
+
+4. En **Request body**:
+```json
+{"ref": "main", "inputs": {"modo": "produccion"}}
+```
+
+5. Click en **"Create"** y probá con **"Run now"** → debe responder `204 No Content`
+
+#### 3c — Verificar que todo funciona
+
+1. Ir a la pestaña **Actions** de tu fork
+2. Click en **"Reserva Automática Cochera"** → **"Run workflow"**
+3. Elegir **`test`** y click en el botón verde
+4. Esperá ~2 minutos:
+   - ✅ Verde = todo configurado correctamente
+   - ❌ Rojo = revisá que los Secrets estén bien cargados
+
+---
+
+## Configuración desde cero
 
 ### Paso 1 — Crear cuenta en GitHub
 Si no tenés, creá una gratis en [github.com](https://github.com).
@@ -63,62 +173,99 @@ Si no tenés, creá una gratis en [github.com](https://github.com).
 
 ### Paso 3 — Subir los archivos
 
-#### Subir `reservar_cochera.py` y `test_reserva.py`
 1. Click en **"Add file" → "Upload files"**
-2. Arrastrá ambos archivos juntos
+2. Subí todos los archivos del proyecto
 3. Click en **"Commit changes"**
-
-#### Crear el workflow
-1. Click en **"Add file" → "Create new file"**
-2. En el nombre escribí exactamente: `.github/workflows/scheduler.yml`
-3. Pegá el contenido del archivo `scheduler.yml`
-4. Click en **"Commit new file"**
 
 ---
 
-### Paso 4 — Guardar credenciales de forma segura
+### Paso 4 — Guardar credenciales de Parkalot
 
 1. En tu repositorio → **Settings** → **Secrets and variables** → **Actions**
 2. Click en **"New repository secret"** y creá estos dos:
 
-| Nombre exacto       | Valor                     |
-|--------------------|--------------------------|
-| `PARKALOT_EMAIL`   | Tu email de Parkalot     |
-| `PARKALOT_PASSWORD`| Tu contraseña de Parkalot|
+| Nombre exacto        | Valor                      |
+|---------------------|---------------------------|
+| `PARKALOT_EMAIL`    | Tu email de Parkalot      |
+| `PARKALOT_PASSWORD` | Tu contraseña de Parkalot |
 
 Los valores quedan encriptados — nadie puede verlos una vez guardados.
 
 ---
 
-### Paso 5 — Probar que funciona
+### Paso 5 — Configurar cron-job.org
 
-1. Ir a la pestaña **Actions** de tu repositorio
-2. Click en **"Reserva Automática Cochera"**
-3. Click en **"Run workflow"**
-4. En el desplegable elegir **`test`**
-5. Click en el botón verde **"Run workflow"**
-6. Esperá ~2 minutos y verificá el resultado:
+#### 5a — Crear un GitHub Personal Access Token
+
+1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
+2. Click en **"Generate new token"**
+3. Completá:
+   - **Token name:** `cron-job-reserva-cochera`
+   - **Expiration:** 1 año
+   - **Repository access:** Only select repositories → `reserva-cochera`
+   - **Permissions → Repository permissions → Actions:** `Read and write`
+4. Click en **"Generate token"** y guardalo en un gestor de contraseñas (se muestra una sola vez)
+
+#### 5b — Crear el cron en cron-job.org
+
+1. Creá una cuenta gratuita en [cron-job.org](https://cron-job.org)
+2. Click en **"Create cronjob"** y completá:
+
+| Campo | Valor |
+|-------|-------|
+| **URL** | `https://api.github.com/repos/TU_USUARIO/reserva-cochera/actions/workflows/scheduler.yml/dispatches` |
+| **Método** | `POST` |
+| **Horario** | `55 18 * * 0,1,2,4` |
+
+3. En **Headers**, agregá estos tres:
+
+| Key | Value |
+|-----|-------|
+| `Authorization` | `Bearer TU_TOKEN` |
+| `Content-Type` | `application/json` |
+| `Accept` | `application/vnd.github.v3+json` |
+
+4. En **Request body**:
+```json
+{"ref": "main", "inputs": {"modo": "produccion"}}
+```
+
+5. Click en **"Create"**
+6. Probá con **"Run now"** → debe responder `204 No Content`
+
+---
+
+### Paso 6 — Verificar que funciona
+
+Para una prueba manual sin esperar el horario:
+
+1. Ir a la pestaña **Actions** del repositorio
+2. Click en **"Reserva Automática Cochera"** → **"Run workflow"**
+3. Elegir **`test`** y click en el botón verde
+4. Esperá ~2 minutos y verificá el resultado:
    - ✅ Verde = reserva exitosa
    - ❌ Rojo = algo falló, click para ver el log
 
-#### Ver los screenshots de cada ejecución
-1. **Actions** → click en la ejecución más reciente
-2. Al final de la página → sección **"Artifacts"**
-3. Descargar el zip con los screenshots de cada paso
+Los screenshots de cada ejecución se guardan como artefactos en el run (sección **Artifacts** al final de cada ejecución).
 
 ---
 
 ## Solución de problemas
 
 ### ❌ Error en el login
-- Verificá los Secrets en Settings — no deben tener espacios
+- Verificá los Secrets en Settings — no deben tener espacios extra
 - Probá loguearte manualmente en [app.parkalot.io](https://app.parkalot.io)
 
 ### ❌ No encuentra las cocheras
 Parkalot puede actualizar su interfaz. Descargá el screenshot del error para ver en qué pantalla falló.
 
+### ❌ El workflow no se dispara a las 16:00
+- Verificá en cron-job.org que el último run devolvió `204 No Content`
+- Confirmá que el token no expiró (duran 1 año por defecto)
+- Revisá que la URL del webhook tenga tu usuario correcto
+
 ### ⚠️ Cambiar el orden de prioridad de cocheras
-En `reservar_cochera.py` y `test_reserva.py`, modificá esta línea:
+En `reservar_cochera.py`:
 ```python
 COCHERAS_PRIORIDAD = [237, 209, 208, 238]
 ```
@@ -128,10 +275,7 @@ En `reservar_cochera.py`:
 ```python
 DIAS_EJECUCION = {6, 0, 1, 3}  # Domingo=6, Lunes=0, Martes=1, Jueves=3
 ```
-En `scheduler.yml`:
-```yaml
-- cron: "55 18 * * 0,1,2,4"   # Dom=0, Lun=1, Mar=2, Jue=4 (en cron UTC)
-```
+Y en cron-job.org actualizá el horario correspondiente.
 
 ### ⚠️ Cambiar el horario de apertura de reservas
 Si Parkalot cambia la hora de apertura (deja de ser 16:00), ajustá en `reservar_cochera.py`:
@@ -139,24 +283,4 @@ Si Parkalot cambia la hora de apertura (deja de ser 16:00), ajustá en `reservar
 HORA_APERTURA   = 16
 MINUTO_APERTURA = 0
 ```
-Y en `scheduler.yml` el cron para que arranque 5 minutos antes.
-
----
-
-## Arquitectura del sistema
-
-```
-GitHub Actions (servidor gratuito en la nube)
-│
-├── scheduler.yml
-│   └── Cron: Dom/Lun/Mar/Jue a las 18:55 UTC (15:55 ARG)
-│
-└── reservar_cochera.py
-    ├── 15:55 → Login en Parkalot
-    ├── 15:55–16:00 → Espera activa (reintenta cada 5s)
-    ├── 16:00 → Click en DETAILS del día siguiente
-    │           (siempre el último botón DETAILS visible)
-    ├── Busca cocheras por orden de prioridad: 237 → 209 → 208 → 238
-    ├── Si ninguna está disponible → reserva la primera de la lista
-    └── Click en RESERVE → Confirmación
-```
+Y en cron-job.org actualizá el horario para que dispare 5 minutos antes.
