@@ -118,6 +118,87 @@ def login(page):
     log.info("Sesión iniciada ✓")
 
 
+def _ordinal_en(n: int) -> str:
+    """1→'1ST', 2→'2ND', 3→'3RD', 14→'14TH', etc."""
+    if 11 <= n % 100 <= 13:
+        suffix = "TH"
+    else:
+        suffix = {1: "ST", 2: "ND", 3: "RD"}.get(n % 10, "TH")
+    return f"{n}{suffix}"
+
+
+def _corregir_fecha_si_necesario(page, prefix: str):
+    """
+    Verifica que la página de reserva muestre mañana.
+    Si muestra hoy, intenta corregirlo:
+      1) Reemplazando la fecha en la URL (si la URL la contiene)
+      2) Clickeando el botón de navegación siguiente ( > )
+    """
+    hoy   = ahora_arg().date()
+    manana = hoy + timedelta(days=1)
+    hoy_iso    = hoy.isoformat()     # "2026-05-14"
+    manana_iso = manana.isoformat()  # "2026-05-15"
+
+    # ── Estrategia 1: URL contiene la fecha ──────────────────────────────
+    url = page.url
+    if manana_iso in url:
+        log.info(f"Fecha correcta en URL: {manana_iso} ✓")
+        return
+    if hoy_iso in url:
+        nueva_url = url.replace(hoy_iso, manana_iso)
+        log.info(f"URL muestra hoy — navegando a {manana_iso}...")
+        page.goto(nueva_url, wait_until="domcontentloaded")
+        page.wait_for_timeout(300)
+        screenshot(page, f"{prefix}_fecha_corregida")
+        log.info("Fecha corregida por URL ✓")
+        return
+
+    # ── Estrategia 2: detectar fecha en heading y click en botón siguiente ─
+    hoy_mes     = hoy.strftime("%B").upper()       # "MAY"
+    hoy_ordinal = _ordinal_en(hoy.day)             # "14TH"
+
+    try:
+        textos = page.locator(
+            "h1, h2, h3, h4, h5, h6, "
+            "[class*='title' i], [class*='header' i], [class*='date' i], "
+            "[class*='Typography']"
+        ).all_inner_texts()
+
+        muestra_hoy = any(
+            hoy_ordinal in t.upper() and hoy_mes in t.upper()
+            for t in textos
+        )
+
+        if not muestra_hoy:
+            log.info("Fecha en página parece correcta ✓")
+            return
+
+        log.info(f"Página muestra hoy ({hoy_ordinal} {hoy_mes}) — avanzando al día siguiente...")
+        selectores_next = [
+            "[data-testid='ChevronRightIcon']",
+            "[data-testid='NavigateNextIcon']",
+            "[data-testid='ArrowForwardIcon']",
+            "button[aria-label*='next' i]",
+            "button[aria-label*='siguiente' i]",
+            "button[aria-label*='forward' i]",
+        ]
+        for sel in selectores_next:
+            try:
+                btn = page.locator(sel).first
+                if btn.count() > 0 and btn.is_visible(timeout=500):
+                    btn.click()
+                    page.wait_for_timeout(300)
+                    screenshot(page, f"{prefix}_fecha_corregida")
+                    log.info("Fecha avanzada al día siguiente ✓")
+                    return
+            except Exception:
+                continue
+
+        log.warning("No se pudo avanzar al día siguiente — continuando igual.")
+    except Exception as e:
+        log.warning(f"No se pudo verificar fecha en página: {e}")
+
+
 def click_details_del_dia(page, intento: int = 0) -> bool:
     """
     Hace click en el SEGUNDO botón DETAILS (el del día siguiente).
@@ -137,7 +218,10 @@ def click_details_del_dia(page, intento: int = 0) -> bool:
         page.wait_for_load_state("domcontentloaded")
         page.wait_for_timeout(500)
         screenshot(page, f"{prefix}_post_details")
-        log.info("Click en DETAILS del día siguiente ✓")
+        log.info("Click en DETAILS ✓")
+
+        # Verificar que la página muestre mañana y no hoy
+        _corregir_fecha_si_necesario(page, prefix)
         return True
     except PlaywrightTimeoutError:
         log.warning("No se encontró el botón DETAILS — las reservas aún no están habilitadas.")
