@@ -30,8 +30,8 @@ PASSWORD        = os.environ.get("PARKALOT_PASSWORD", "")
 WHATSAPP_PHONE  = os.environ.get("WHATSAPP_PHONE", "")   # Ej: 5491112345678
 WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 
-# Orden de prioridad de cocheras
-COCHERAS_PRIORIDAD = [237, 209, 208, 238]
+# Orden de prioridad de cocheras (209 eliminada — asignada por el admin)
+COCHERAS_PRIORIDAD = [208, 237, 238]
 
 # Días en que corre el script (para reservar el día siguiente hábil)
 # Domingo=6, Lunes=0, Martes=1, Jueves=3
@@ -260,7 +260,9 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     cocheras_disponibles = {}
     try:
-        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
+        # :has(h6):has(p) excluye los marcadores del mapa (solo tienen h6)
+        # y selecciona solo los ítems de la lista (tienen h6 + p con ubicación)
+        items = page.locator("button.MuiButtonBase-root:has(h6):has(p)").all()
         for item in items:
             try:
                 n = int(item.locator("h6").inner_text().strip())
