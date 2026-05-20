@@ -77,25 +77,27 @@ class TestFechaMañanaStr:
 
 class TestSeleccionarCochera:
     def test_primera_prioridad(self):
-        cocheras = {237: "btn237", 209: "btn209", 208: "btn208", 238: "btn238"}
-        numero, elemento = rc.seleccionar_cochera(cocheras)
-        assert numero == 237
-        assert elemento == "btn237"
-
-    def test_segunda_prioridad(self):
-        cocheras = {209: "btn209", 208: "btn208", 238: "btn238"}
-        numero, elemento = rc.seleccionar_cochera(cocheras)
-        assert numero == 209
-
-    def test_tercera_prioridad(self):
-        cocheras = {208: "btn208", 238: "btn238"}
+        # Prioridad actual: 208 → 237 → 238 (209 eliminada)
+        cocheras = {208: "btn208", 237: "btn237", 238: "btn238"}
         numero, elemento = rc.seleccionar_cochera(cocheras)
         assert numero == 208
+        assert elemento == "btn208"
 
-    def test_cuarta_prioridad(self):
+    def test_segunda_prioridad(self):
+        cocheras = {237: "btn237", 238: "btn238"}
+        numero, elemento = rc.seleccionar_cochera(cocheras)
+        assert numero == 237
+
+    def test_tercera_prioridad(self):
         cocheras = {238: "btn238", 300: "btn300"}
         numero, elemento = rc.seleccionar_cochera(cocheras)
         assert numero == 238
+
+    def test_cuarta_prioridad(self):
+        # Sin ninguna prioritaria → fallback a la primera disponible
+        cocheras = {300: "btn300", 100: "btn100"}
+        numero, elemento = rc.seleccionar_cochera(cocheras)
+        assert numero == 100
 
     def test_fallback_primera_disponible(self):
         cocheras = {300: "btn300", 100: "btn100", 400: "btn400"}
