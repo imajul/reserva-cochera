@@ -264,12 +264,21 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         # MUI puede renderizar solo los elementos cercanos al viewport actual;
         # al hacer scroll hasta el último ítem visible se fuerza la carga del resto.
         n_previo = -1
-        for _ in range(10):
+        for scroll_iter in range(10):
             todos = page.locator("button.MuiButtonBase-root:has(h6)").all()
             items_lista = [
                 i for i in todos
                 if (b := i.bounding_box()) and b["width"] >= 150
             ]
+            numeros_iter = []
+            for i in items_lista:
+                try:
+                    numeros_iter.append(int(i.locator("h6").inner_text().strip()))
+                except ValueError:
+                    pass
+            log.info(f"  scroll iter {scroll_iter}: {len(items_lista)} ítems → {sorted(numeros_iter)}")
+            screenshot(page, f"{prefix}_scroll_{scroll_iter:02d}")
+
             if len(items_lista) == n_previo:
                 break  # el recuento se estabilizó — todos los ítems están en el DOM
             n_previo = len(items_lista)
