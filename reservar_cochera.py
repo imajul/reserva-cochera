@@ -311,9 +311,12 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
-            screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
-            continue
+            # Estado de transición (gris): esperar y reintentar antes de descartar
+            page.wait_for_timeout(600)
+            if not reserve_btn.is_enabled():
+                log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
+                screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
+                continue
 
         # Cochera disponible — reservar
         log.info(f"Cochera {cochera_num} disponible — reservando...")
