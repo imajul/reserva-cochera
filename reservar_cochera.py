@@ -260,11 +260,15 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     cocheras_disponibles = {}
     try:
-        # :has(h6):has(p) excluye los marcadores del mapa (solo tienen h6)
-        # y selecciona solo los ítems de la lista (tienen h6 + p con ubicación)
-        items = page.locator("button.MuiButtonBase-root:has(h6):has(p)").all()
-        for item in items:
+        # Filtramos por ancho: los ítems de la lista lateral son anchos (>150px)
+        # mientras que los marcadores del mapa son pequeños (~30-50px).
+        # Esto evita clickear marcadores del mapa en lugar de ítems de la lista.
+        todos = page.locator("button.MuiButtonBase-root:has(h6)").all()
+        for item in todos:
             try:
+                box = item.bounding_box()
+                if box is None or box["width"] < 150:
+                    continue  # marcador del mapa, ignorar
                 n = int(item.locator("h6").inner_text().strip())
                 cocheras_disponibles[n] = item
             except ValueError:
