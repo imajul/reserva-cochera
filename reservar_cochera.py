@@ -7,7 +7,7 @@ Flujo:
   4. En el mapa, buscar cochera según orden de prioridad
   5. Click en la cochera → Click en RESERVE
 
-Días de ejecución: domingo, lunes, martes y jueves (para reservar el día siguiente).
+Días de ejecución: domingo a jueves (para reservar lunes a viernes).
 Orden de prioridad: 208 → 237 → 238 → primera disponible en la lista.
 """
 
@@ -34,8 +34,8 @@ WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 COCHERAS_PRIORIDAD = [208, 237, 238]
 
 # Días en que corre el script (para reservar el día siguiente hábil)
-# Domingo=6, Lunes=0, Martes=1, Jueves=3
-DIAS_EJECUCION  = {6, 0, 1, 3}
+# Domingo=6, Lunes=0, Martes=1, Miércoles=2, Jueves=3
+DIAS_EJECUCION  = {6, 0, 1, 2, 3}
 
 TZ_ARG          = pytz.timezone("America/Argentina/Buenos_Aires")
 HORA_APERTURA   = 16

@@ -35,13 +35,13 @@ class TestDebeEjecutarHoy:
         return datetime(fecha.year, fecha.month, fecha.day, 12, 0, 0, tzinfo=self.TZ)
 
     @pytest.mark.parametrize("fecha,esperado", [
-        (date(2024, 3, 18), True),   # lunes   (0)
-        (date(2024, 3, 19), True),   # martes  (1)
-        (date(2024, 3, 20), False),  # miércoles (2)
-        (date(2024, 3, 21), True),   # jueves  (3)
-        (date(2024, 3, 22), False),  # viernes (4)
-        (date(2024, 3, 23), False),  # sábado  (5)
-        (date(2024, 3, 24), True),   # domingo (6)
+        (date(2024, 3, 18), True),   # lunes      (0)
+        (date(2024, 3, 19), True),   # martes     (1)
+        (date(2024, 3, 20), True),   # miércoles  (2)
+        (date(2024, 3, 21), True),   # jueves     (3)
+        (date(2024, 3, 22), False),  # viernes    (4)
+        (date(2024, 3, 23), False),  # sábado     (5)
+        (date(2024, 3, 24), True),   # domingo    (6)
     ])
     def test_dias_ejecucion(self, fecha, esperado):
         with patch("reservar_cochera.ahora_arg", return_value=self._dt(fecha)):
