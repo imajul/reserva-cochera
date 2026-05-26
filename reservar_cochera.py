@@ -8,7 +8,7 @@ Flujo:
   5. Click en la cochera → Click en RESERVE
 
 Días de ejecución: domingo, lunes, martes y jueves (para reservar el día siguiente).
-Orden de prioridad: 237 → 209 → 208 → 238 → primera disponible en la lista.
+Orden de prioridad: 208 → 237 → 238 → primera disponible en la lista.
 """
 
 import os
