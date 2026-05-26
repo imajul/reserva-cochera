@@ -260,9 +260,24 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     cocheras_disponibles = {}
     try:
-        # Filtramos por ancho: los ítems de la lista lateral son anchos (>150px)
-        # mientras que los marcadores del mapa son pequeños (~30-50px).
-        # Esto evita clickear marcadores del mapa en lugar de ítems de la lista.
+        # Scroll incremental para que el panel cargue todos sus ítems.
+        # MUI puede renderizar solo los elementos cercanos al viewport actual;
+        # al hacer scroll hasta el último ítem visible se fuerza la carga del resto.
+        n_previo = -1
+        for _ in range(10):
+            todos = page.locator("button.MuiButtonBase-root:has(h6)").all()
+            items_lista = [
+                i for i in todos
+                if (b := i.bounding_box()) and b["width"] >= 150
+            ]
+            if len(items_lista) == n_previo:
+                break  # el recuento se estabilizó — todos los ítems están en el DOM
+            n_previo = len(items_lista)
+            if items_lista:
+                items_lista[-1].scroll_into_view_if_needed()
+                page.wait_for_timeout(200)
+
+        # Scan final con la lista completa
         todos = page.locator("button.MuiButtonBase-root:has(h6)").all()
         for item in todos:
             try:
