@@ -4,7 +4,7 @@ name: Reserva Automática Cochera
 # via workflow_dispatch para garantizar puntualidad.
 # Endpoint: POST https://api.github.com/repos/imajul/reserva-cochera/actions/workflows/scheduler.yml/dispatches
 # Body: {"ref": "main", "inputs": {"modo": "produccion"}}
-# Horario: 55 18 * * 0,1,2,4  (18:55 UTC = 15:55 ARG — Dom, Lun, Mar, Jue)
+# Horario: 55 18 * * 0,1,2,3,4  (18:55 UTC = 15:55 ARG — Dom, Lun, Mar, Mié, Jue)
 
 on:
   workflow_dispatch:

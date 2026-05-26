@@ -7,8 +7,8 @@ Flujo:
   4. En el mapa, buscar cochera según orden de prioridad
   5. Click en la cochera → Click en RESERVE
 
-Días de ejecución: domingo, lunes, martes y jueves (para reservar el día siguiente).
-Orden de prioridad: 237 → 209 → 208 → 238 → primera disponible en la lista.
+Días de ejecución: domingo a jueves (para reservar lunes a viernes).
+Orden de prioridad: 208 → 237 → 238 → primera disponible en la lista.
 """
 
 import os
@@ -34,8 +34,8 @@ WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 COCHERAS_PRIORIDAD = [208, 237, 238]
 
 # Días en que corre el script (para reservar el día siguiente hábil)
-# Domingo=6, Lunes=0, Martes=1, Jueves=3
-DIAS_EJECUCION  = {6, 0, 1, 3}
+# Domingo=6, Lunes=0, Martes=1, Miércoles=2, Jueves=3
+DIAS_EJECUCION  = {6, 0, 1, 2, 3}
 
 TZ_ARG          = pytz.timezone("America/Argentina/Buenos_Aires")
 HORA_APERTURA   = 16
@@ -311,9 +311,12 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
-            screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
-            continue
+            # Estado de transición (gris): esperar y reintentar antes de descartar
+            page.wait_for_timeout(600)
+            if not reserve_btn.is_enabled():
+                log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
+                screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
+                continue
 
         # Cochera disponible — reservar
         log.info(f"Cochera {cochera_num} disponible — reservando...")
