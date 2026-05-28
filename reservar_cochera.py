@@ -260,43 +260,41 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     cocheras_disponibles = {}
     try:
-        # Scroll incremental para que el panel cargue todos sus ítems.
-        # MUI puede renderizar solo los elementos cercanos al viewport actual;
-        # al hacer scroll hasta el último ítem visible se fuerza la carga del resto.
+        # Scroll incremental acumulando referencias en cada iteración.
+        # El scroll virtual de MUI evicta ítems del DOM al alejarse del viewport,
+        # por eso NO hacemos un scan final separado sino que acumulamos durante el scroll.
+        # Las referencias se actualizan en cada iter (la más reciente es la válida).
+        # Paramos en cuanto todas las cocheras prioritarias están en el dict.
         n_previo = -1
         for scroll_iter in range(10):
             todos = page.locator("button.MuiButtonBase-root:has(h6)").all()
-            items_lista = [
-                i for i in todos
-                if (b := i.bounding_box()) and b["width"] >= 150
-            ]
-            numeros_iter = []
-            for i in items_lista:
+            items_esta_iter = {}
+            for item in todos:
                 try:
-                    numeros_iter.append(int(i.locator("h6").inner_text().strip()))
-                except ValueError:
-                    pass
-            log.info(f"  scroll iter {scroll_iter}: {len(items_lista)} ítems → {sorted(numeros_iter)}")
+                    box = item.bounding_box()
+                    if box and box["width"] >= 150:
+                        n = int(item.locator("h6").inner_text().strip())
+                        items_esta_iter[n] = item
+                except (ValueError, Exception):
+                    continue
+
+            cocheras_disponibles.update(items_esta_iter)  # ref más reciente gana
+            log.info(f"  scroll iter {scroll_iter}: {len(items_esta_iter)} ítems → {sorted(items_esta_iter.keys())}")
             screenshot(page, f"{prefix}_scroll_{scroll_iter:02d}")
 
-            if len(items_lista) == n_previo:
-                break  # el recuento se estabilizó — todos los ítems están en el DOM
-            n_previo = len(items_lista)
-            if items_lista:
-                items_lista[-1].scroll_into_view_if_needed()
+            if len(items_esta_iter) == n_previo:
+                break  # recuento estabilizado — lista completa
+            n_previo = len(items_esta_iter)
+
+            # Parar antes de scrollear más si ya tenemos todas las prioritarias
+            if all(p in cocheras_disponibles for p in COCHERAS_PRIORIDAD):
+                log.info("Cocheras prioritarias localizadas — deteniendo scroll")
+                break
+
+            if items_esta_iter:
+                list(items_esta_iter.values())[-1].scroll_into_view_if_needed()
                 page.wait_for_timeout(200)
 
-        # Scan final con la lista completa
-        todos = page.locator("button.MuiButtonBase-root:has(h6)").all()
-        for item in todos:
-            try:
-                box = item.bounding_box()
-                if box is None or box["width"] < 150:
-                    continue  # marcador del mapa, ignorar
-                n = int(item.locator("h6").inner_text().strip())
-                cocheras_disponibles[n] = item
-            except ValueError:
-                continue
     except Exception as e:
         log.error(f"Error obteniendo lista de cocheras: {e}")
         screenshot(page, f"{prefix}_error_lista")
@@ -320,8 +318,12 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
 
-        elemento.scroll_into_view_if_needed()
-        elemento.click()
+        try:
+            elemento.scroll_into_view_if_needed()
+            elemento.click()
+        except Exception:
+            log.warning(f"Cochera {cochera_num}: elemento fuera del DOM (scroll virtual) — saltando")
+            continue
         page.wait_for_timeout(200)
         screenshot(page, f"{prefix}_cochera_{cochera_num}_sel")
 
