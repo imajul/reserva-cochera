@@ -337,11 +337,11 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            # Estado de transición (gris): Parkalot deshabilita RESERVE brevemente
-            # mientras procesa la lista de espera al abrir reservas (~1-3s a las 16:00).
-            # Hacemos polling cada 300ms hasta que se habilite o pasen 2 segundos.
+            # Estado de transición (gris): esperar hasta 600ms antes de descartar.
+            # Por el momento en que el script llega (~16:00:03), el estado gris ya
+            # se resolvió; más de 2 intentos no cambia el resultado.
             habilitado = False
-            for _ in range(7):
+            for _ in range(2):
                 page.wait_for_timeout(300)
                 if reserve_btn.is_enabled():
                     habilitado = True
