@@ -318,6 +318,29 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
 
+        # Verificar que el nodo DOM no fue reciclado por el scroll virtual.
+        # Si el h6 muestra un número distinto al esperado, reubicar el elemento.
+        try:
+            num_en_dom = int(elemento.locator("h6").inner_text(timeout=500).strip())
+        except Exception:
+            log.warning(f"Cochera {cochera_num}: referencia inválida — saltando")
+            continue
+
+        if num_en_dom != cochera_num:
+            log.warning(f"Cochera {cochera_num}: nodo reciclado (DOM muestra {num_en_dom}) — reubicando...")
+            elemento = None
+            for item in page.locator("button.MuiButtonBase-root:has(h6)").all():
+                try:
+                    box = item.bounding_box()
+                    if box and box["width"] >= 150 and int(item.locator("h6").inner_text().strip()) == cochera_num:
+                        elemento = item
+                        break
+                except Exception:
+                    continue
+            if elemento is None:
+                log.warning(f"Cochera {cochera_num}: no hallada tras reciclaje — saltando")
+                continue
+
         try:
             elemento.scroll_into_view_if_needed()
             elemento.click()
