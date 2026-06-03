@@ -89,7 +89,7 @@ def esperar_hasta_previa_apertura():
     pre_apertura = apertura - timedelta(seconds=10)
     if ahora < pre_apertura:
         espera_seg = (pre_apertura - ahora).total_seconds()
-        log.info(f"Son las {ahora.strftime('%H:%M:%S')} ARG. Esperando hasta las 15:59:50 ({int(espera_seg)}s)...")
+        log.info(f"Son las {ahora.strftime('%H:%M:%S')} ARG. Esperando hasta las {pre_apertura.strftime('%H:%M:%S')} ({int(espera_seg)}s)...")
         time.sleep(espera_seg)
     log.info("Entrando en modo de espera activa...")
 
@@ -127,7 +127,15 @@ def reservar_via_api(token: str, spot_id: int, fecha: str, uid: str) -> bool:
     }
     headers = {"Authorization": f"Bearer {token}"}
 
-    resp = httpx.post(PARKALOT_RESERVE_URL, json=payload, headers=headers, timeout=10)
+    try:
+        resp = httpx.post(PARKALOT_RESERVE_URL, json=payload, headers=headers, timeout=30)
+    except httpx.TimeoutException:
+        log.warning(f"Cochera {spot_id}: timeout — reintentando en 2s...")
+        time.sleep(2)
+        try:
+            resp = httpx.post(PARKALOT_RESERVE_URL, json=payload, headers=headers, timeout=30)
+        except httpx.TimeoutException as e:
+            raise RuntimeError(f"Timeout persistente al reservar cochera {spot_id}: {e}") from e
 
     if resp.status_code in (200, 201):
         log.info(f"✅ Cochera {spot_id} reservada para {fecha}")
@@ -145,7 +153,10 @@ def reservar_via_api(token: str, spot_id: int, fecha: str, uid: str) -> bool:
     if resp.status_code >= 500:
         log.warning(f"Error de servidor {resp.status_code} en cochera {spot_id} — reintentando en 1s...")
         time.sleep(1)
-        resp2 = httpx.post(PARKALOT_RESERVE_URL, json=payload, headers=headers, timeout=10)
+        try:
+            resp2 = httpx.post(PARKALOT_RESERVE_URL, json=payload, headers=headers, timeout=30)
+        except httpx.TimeoutException as e:
+            raise RuntimeError(f"Timeout en reintento 5xx para cochera {spot_id}: {e}") from e
         if resp2.status_code in (200, 201):
             log.info(f"✅ Cochera {spot_id} reservada (reintento)")
             return True
@@ -199,9 +210,12 @@ def main():
             hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
         )
 
-        if ahora_actual < apertura:
-            log.info(f"[Intento #{intentos}] Esperando apertura de las 16:00...")
-            time.sleep(INTERVALO_REINTENTO_SEG)
+        seg_hasta_apertura = (apertura - ahora_actual).total_seconds()
+        if seg_hasta_apertura > 0.05:
+            espera = min(seg_hasta_apertura - 0.05, INTERVALO_REINTENTO_SEG)
+            if espera > 1:
+                log.info(f"Esperando apertura de las {apertura.strftime('%H:%M')} (faltan {seg_hasta_apertura:.0f}s)...")
+            time.sleep(espera)
             continue
 
         log.info(f"[Intento #{intentos} — {ahora_actual.strftime('%H:%M:%S')} ARG]")
@@ -218,8 +232,8 @@ def main():
             sys.exit(1)
 
         if not reservado:
-            log.info(f"Todas las cocheras prioritarias ocupadas en intento #{intentos}. Reintentando en {INTERVALO_REINTENTO_SEG}s...")
-            time.sleep(INTERVALO_REINTENTO_SEG)
+            log.info(f"Todas las cocheras prioritarias ocupadas en intento #{intentos}. Reintentando en 1s...")
+            time.sleep(1)
 
     if not reservado:
         log.error(f"❌ No se pudo reservar luego de {intentos} intentos.")
