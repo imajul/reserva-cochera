@@ -46,31 +46,21 @@ jobs:
           python-version: "3.11"
       - name: Instalar dependencias
         run: pip install -r requirements.txt
-      - name: Instalar Chromium
-        run: |
-          playwright install chromium
-          playwright install-deps chromium
       - name: Ejecutar en modo PRODUCCIÓN
         if: inputs.modo == 'produccion'
         env:
-          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
-          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
-          WHATSAPP_PHONE:    ${{ secrets.WHATSAPP_PHONE }}
-          WHATSAPP_APIKEY:   ${{ secrets.WHATSAPP_APIKEY }}
+          PARKALOT_REFRESH_TOKEN: ${{ secrets.PARKALOT_REFRESH_TOKEN }}
+          PARKALOT_UID:           ${{ secrets.PARKALOT_UID }}
+          PARKALOT_API_KEY:       ${{ secrets.PARKALOT_API_KEY }}
+          WHATSAPP_PHONE:         ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY:        ${{ secrets.WHATSAPP_APIKEY }}
         run: python reservar_cochera.py
       - name: Ejecutar en modo TEST
         if: inputs.modo == 'test'
         env:
-          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
-          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
-          WHATSAPP_PHONE:    ${{ secrets.WHATSAPP_PHONE }}
-          WHATSAPP_APIKEY:   ${{ secrets.WHATSAPP_APIKEY }}
-        run: python test_reserva.py
-      - name: Subir screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots-${{ inputs.modo }}-${{ github.run_id }}
-          path: "*.png"
-          if-no-files-found: ignore
-          retention-days: 7
+          PARKALOT_REFRESH_TOKEN: ${{ secrets.PARKALOT_REFRESH_TOKEN }}
+          PARKALOT_UID:           ${{ secrets.PARKALOT_UID }}
+          PARKALOT_API_KEY:       ${{ secrets.PARKALOT_API_KEY }}
+          WHATSAPP_PHONE:         ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY:        ${{ secrets.WHATSAPP_APIKEY }}
+        run: python reservar_cochera.py
