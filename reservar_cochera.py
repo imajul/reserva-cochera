@@ -318,6 +318,29 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
 
+        # Verificar que el nodo DOM no fue reciclado por el scroll virtual.
+        # Si el h6 muestra un número distinto al esperado, reubicar el elemento.
+        try:
+            num_en_dom = int(elemento.locator("h6").inner_text(timeout=500).strip())
+        except Exception:
+            log.warning(f"Cochera {cochera_num}: referencia inválida — saltando")
+            continue
+
+        if num_en_dom != cochera_num:
+            log.warning(f"Cochera {cochera_num}: nodo reciclado (DOM muestra {num_en_dom}) — reubicando...")
+            elemento = None
+            for item in page.locator("button.MuiButtonBase-root:has(h6)").all():
+                try:
+                    box = item.bounding_box()
+                    if box and box["width"] >= 150 and int(item.locator("h6").inner_text().strip()) == cochera_num:
+                        elemento = item
+                        break
+                except Exception:
+                    continue
+            if elemento is None:
+                log.warning(f"Cochera {cochera_num}: no hallada tras reciclaje — saltando")
+                continue
+
         try:
             elemento.scroll_into_view_if_needed()
             elemento.click()
@@ -337,11 +360,11 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            # Estado de transición (gris): Parkalot deshabilita RESERVE brevemente
-            # mientras procesa la lista de espera al abrir reservas (~1-3s a las 16:00).
-            # Hacemos polling cada 300ms hasta que se habilite o pasen 2 segundos.
+            # Estado de transición (gris): esperar hasta 600ms antes de descartar.
+            # Por el momento en que el script llega (~16:00:03), el estado gris ya
+            # se resolvió; más de 2 intentos no cambia el resultado.
             habilitado = False
-            for _ in range(7):
+            for _ in range(2):
                 page.wait_for_timeout(300)
                 if reserve_btn.is_enabled():
                     habilitado = True
