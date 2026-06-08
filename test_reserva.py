@@ -1,17 +1,18 @@
 """
 Script de PRUEBA — Reserva real en Parkalot via API httpx.
-Intenta reservar para mañana de inmediato, sin esperar las 16:00.
+Intenta reservar para HOY de inmediato, sin esperar las 16:00.
 Orden de prioridad: según COCHERAS_PRIORIDAD.
 """
 
 import sys
 import logging
+from datetime import date
 
 from reservar_cochera import (
     PARKALOT_REFRESH_TOKEN, PARKALOT_UID, PARKALOT_API_KEY,
-    COCHERAS_PRIORIDAD,
+    COCHERAS_PRIORIDAD, TZ_ARG,
     renovar_token, reservar_via_api, TokenInvalidoError,
-    fecha_manana_str, enviar_whatsapp,
+    enviar_whatsapp,
 )
 
 logging.basicConfig(
@@ -24,7 +25,7 @@ log = logging.getLogger(__name__)
 
 def main():
     log.info("=" * 60)
-    log.info("  TEST — Reserva real inmediata (sin espera de horario)")
+    log.info("  TEST — Reserva real inmediata para HOY")
     log.info("=" * 60)
 
     for var, nombre in [
@@ -36,8 +37,9 @@ def main():
             log.error(f"Variable de entorno faltante: {nombre}")
             sys.exit(1)
 
-    fecha = fecha_manana_str()
-    log.info(f"Reservando para: {fecha}")
+    from datetime import datetime
+    fecha = datetime.now(TZ_ARG).date().isoformat()  # hoy en hora ARG
+    log.info(f"Reservando para: {fecha} (HOY)")
     log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
 
     log.info("Obteniendo token Firebase...")
@@ -55,7 +57,7 @@ def main():
             if reservar_via_api(token, cochera, fecha, PARKALOT_UID):
                 reservado = True
                 log.info(f"✅ Cochera {cochera} reservada para {fecha}")
-                enviar_whatsapp(f"✅ [TEST] Cochera {cochera} reservada para el {fecha} 🚗")
+                enviar_whatsapp(f"✅ [TEST] Cochera {cochera} reservada para hoy {fecha} 🚗")
                 break
             else:
                 log.info(f"Cochera {cochera} ocupada — siguiente...")
@@ -68,7 +70,7 @@ def main():
 
     if not reservado:
         log.error("❌ Todas las cocheras de la lista están ocupadas o no disponibles.")
-        enviar_whatsapp(f"❌ [TEST] No se pudo reservar ninguna cochera para {fecha}.")
+        enviar_whatsapp(f"❌ [TEST] No se pudo reservar ninguna cochera para hoy {fecha}.")
         sys.exit(1)
 
     log.info("✅ Test finalizado correctamente.")
@@ -76,3 +78,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
