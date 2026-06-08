@@ -1,17 +1,18 @@
 """
-Script de PRUEBA — Reserva real en Parkalot.
-Reserva para HOY sin esperar las 16:00.
-Orden de prioridad: 237 → 209 → 208 → 238 → primera disponible.
+Script de PRUEBA — Reserva real en Parkalot via API httpx.
+Intenta reservar para HOY de inmediato, sin esperar las 16:00.
+Orden de prioridad: según COCHERAS_PRIORIDAD.
 """
 
 import sys
 import logging
-from playwright.sync_api import sync_playwright
+from datetime import date
 
 from reservar_cochera import (
-    PARKALOT_URL, COCHERAS_PRIORIDAD,
-    login, click_details_del_dia, seleccionar_y_reservar_cochera,
-    fecha_manana_str, enviar_whatsapp,
+    PARKALOT_REFRESH_TOKEN, PARKALOT_UID, PARKALOT_API_KEY,
+    COCHERAS_PRIORIDAD, TZ_ARG,
+    renovar_token, reservar_via_api, TokenInvalidoError,
+    enviar_whatsapp,
 )
 
 logging.basicConfig(
@@ -24,54 +25,57 @@ log = logging.getLogger(__name__)
 
 def main():
     log.info("=" * 60)
-    log.info("  TEST — Reserva real inmediata (sin espera de horario)")
+    log.info("  TEST — Reserva real inmediata para HOY")
     log.info("=" * 60)
-    log.info(f"Reservando para: {fecha_manana_str()}")
+
+    for var, nombre in [
+        (PARKALOT_REFRESH_TOKEN, "PARKALOT_REFRESH_TOKEN"),
+        (PARKALOT_UID,           "PARKALOT_UID"),
+        (PARKALOT_API_KEY,       "PARKALOT_API_KEY"),
+    ]:
+        if not var:
+            log.error(f"Variable de entorno faltante: {nombre}")
+            sys.exit(1)
+
+    from datetime import datetime
+    fecha = datetime.now(TZ_ARG).date().isoformat()  # hoy en hora ARG
+    log.info(f"Reservando para: {fecha} (HOY)")
     log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage"]
-        )
-        context = browser.new_context(
-            viewport={"width": 1440, "height": 900},
-            locale="es-AR",
-            timezone_id="America/Argentina/Buenos_Aires"
-        )
-        page = context.new_page()
+    log.info("Obteniendo token Firebase...")
+    try:
+        token = renovar_token(PARKALOT_REFRESH_TOKEN, PARKALOT_API_KEY)
+    except Exception as e:
+        log.error(f"No se pudo obtener token: {e}")
+        enviar_whatsapp(f"❌ Test fallido — error de autenticación: {e}")
+        sys.exit(1)
 
+    reservado = False
+    for cochera in COCHERAS_PRIORIDAD:
+        log.info(f"Intentando cochera {cochera}...")
         try:
-            enviar_whatsapp(f"🧪 Test de notificación activo — reserva para el {fecha_manana_str()}")
-            login(page)
-            page.screenshot(path="test_01_post_login.png")
-
-            if not click_details_del_dia(page):
-                log.error("❌ No se encontró el botón DETAILS.")
-                log.error("   Posibles causas:")
-                log.error("   - Las reservas aún no están habilitadas (ejecutar cerca de las 16:00)")
-                log.error("   - La sesión no se inició correctamente")
-                page.screenshot(path="test_02_sin_details.png")
-                sys.exit(1)
-
-            page.screenshot(path="test_02_post_details.png")
-
-            exito = seleccionar_y_reservar_cochera(page)
-            if not exito:
-                log.error("❌ La reserva de prueba falló — todas las cocheras ocupadas.")
-                sys.exit(1)
-        except Exception as e:
-            log.exception(f"Error inesperado: {e}")
-            try:
-                page.screenshot(path="test_error_inesperado.png")
-            except Exception:
-                pass
+            if reservar_via_api(token, cochera, fecha, PARKALOT_UID):
+                reservado = True
+                log.info(f"✅ Cochera {cochera} reservada para {fecha}")
+                enviar_whatsapp(f"✅ [TEST] Cochera {cochera} reservada para hoy {fecha} 🚗")
+                break
+            else:
+                log.info(f"Cochera {cochera} ocupada — siguiente...")
+        except TokenInvalidoError as e:
+            log.error(f"Token rechazado (401): {e}")
+            enviar_whatsapp(f"❌ Test fallido — token rechazado (401). Revisá el log.")
             sys.exit(1)
-        finally:
-            browser.close()
+        except Exception as e:
+            log.error(f"Error en cochera {cochera}: {e}")
+
+    if not reservado:
+        log.error("❌ Todas las cocheras de la lista están ocupadas o no disponibles.")
+        enviar_whatsapp(f"❌ [TEST] No se pudo reservar ninguna cochera para hoy {fecha}.")
+        sys.exit(1)
 
     log.info("✅ Test finalizado correctamente.")
 
 
 if __name__ == "__main__":
     main()
+
