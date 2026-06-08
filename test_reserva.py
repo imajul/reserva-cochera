@@ -71,8 +71,10 @@ def main():
     except Exception as e:
         log.warning(f"No se pudo decodificar JWT: {e}")
 
+    # Para este test apuntamos directamente a la 208 (spotId "bbbaaaa")
+    cocheras_test = ["bbbaaaa"]
     reservado = False
-    for cochera in COCHERAS_PRIORIDAD:
+    for cochera in cocheras_test:
         log.info(f"Intentando cochera {cochera}...")
         try:
             if reservar_via_api(token, cochera, fecha, PARKALOT_UID):
