@@ -166,48 +166,52 @@ class TestReservarViaApi:
 
     def test_retorna_true_en_200(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(200)):
-            assert rc.reservar_via_api("tok", 209, "2026-06-04", "uid-abc") is True
+            assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is True
 
     def test_retorna_true_en_201(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(201)):
-            assert rc.reservar_via_api("tok", 208, "2026-06-04", "uid-abc") is True
+            assert rc.reservar_via_api("tok", "bbbaaaa", "2026-06-04", "uid-abc") is True
 
     def test_retorna_false_en_409_spot_ocupado(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(409)):
-            assert rc.reservar_via_api("tok", 209, "2026-06-04", "uid-abc") is False
+            assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is False
 
     def test_retorna_false_en_403(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(403)):
-            assert rc.reservar_via_api("tok", 209, "2026-06-04", "uid-abc") is False
+            assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is False
 
     def test_lanza_error_en_401(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(401)):
             with pytest.raises(rc.TokenInvalidoError):
-                rc.reservar_via_api("tok-invalido", 209, "2026-06-04", "uid-abc")
+                rc.reservar_via_api("tok-invalido", "bbbaaaaa", "2026-06-04", "uid-abc")
 
     def test_reintenta_una_vez_en_500_y_retorna_true(self):
         responses = [self._mock_resp(500), self._mock_resp(200)]
         with patch("reservar_cochera.httpx.post", side_effect=responses):
             with patch("reservar_cochera.time"):
-                assert rc.reservar_via_api("tok", 209, "2026-06-04", "uid-abc") is True
+                assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is True
 
     def test_lanza_error_en_500_persistente(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(503, "service unavailable")):
             with patch("reservar_cochera.time"):
                 with pytest.raises(RuntimeError, match="503"):
-                    rc.reservar_via_api("tok", 209, "2026-06-04", "uid-abc")
+                    rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc")
 
     def test_lanza_error_en_respuesta_inesperada(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(422, "unprocessable")):
             with pytest.raises(RuntimeError, match="422"):
-                rc.reservar_via_api("tok", 209, "2026-06-04", "uid-abc")
+                rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc")
 
     def test_payload_correcto(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(200)) as mock_post:
-            rc.reservar_via_api("mi-token", 209, "2026-06-04", "mi-uid")
+            rc.reservar_via_api("mi-token", "bbbaaaaa", "2026-06-04", "mi-uid")
         kwargs = mock_post.call_args[1]
-        assert kwargs["json"]["day"] == "2026-06-04"
-        assert kwargs["json"]["spotId"] == 209
-        assert kwargs["json"]["shifts"] == ["00002400"]
+        from datetime import date
+        assert kwargs["json"]["day"] == (date(2026, 6, 4) - date(1970, 1, 1)).days
+        assert kwargs["json"]["spotId"] == "bbbaaaaa"
+        assert kwargs["json"]["addShifts"] == ["00002400"]
+        assert kwargs["json"]["removeShifts"] == []
         assert kwargs["json"]["uid"] == "mi-uid"
+        assert kwargs["json"]["me"] == "mi-uid"
+        assert kwargs["json"]["parkingId"] == rc.PARKALOT_PARKING_ID
         assert kwargs["headers"]["Authorization"] == "Bearer mi-token"
