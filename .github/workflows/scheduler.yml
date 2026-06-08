@@ -63,4 +63,4 @@ jobs:
           PARKALOT_API_KEY:       ${{ secrets.PARKALOT_API_KEY }}
           WHATSAPP_PHONE:         ${{ secrets.WHATSAPP_PHONE }}
           WHATSAPP_APIKEY:        ${{ secrets.WHATSAPP_APIKEY }}
-        run: python reservar_cochera.py
+        run: python test_reserva.py

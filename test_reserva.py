@@ -5,6 +5,8 @@ Orden de prioridad: según COCHERAS_PRIORIDAD.
 """
 
 import sys
+import json
+import base64
 import logging
 from datetime import date
 
@@ -50,8 +52,29 @@ def main():
         enviar_whatsapp(f"❌ Test fallido — error de autenticación: {e}")
         sys.exit(1)
 
+    # Decodificar el JWT para comparar el UID embebido con PARKALOT_UID
+    try:
+        payload_b64 = token.split(".")[1]
+        payload_b64 += "=" * (-len(payload_b64) % 4)  # padding
+        jwt_payload = json.loads(base64.b64decode(payload_b64))
+        uid_en_token = jwt_payload.get("user_id") or jwt_payload.get("sub", "?")
+        log.info(f"UID en JWT (Firebase):  '{uid_en_token}'")
+        log.info(f"PARKALOT_UID (secreto): '{PARKALOT_UID}'")
+        if uid_en_token != PARKALOT_UID:
+            log.warning("⚠️  LOS UIDs NO COINCIDEN — este es el motivo del 401")
+        else:
+            log.info("✅ UIDs coinciden")
+        # Loguear todos los claims para detectar custom claims que Parkalot requiera
+        claims_relevantes = {k: v for k, v in jwt_payload.items()
+                             if k not in ("iat", "exp", "auth_time")}
+        log.info(f"Claims JWT completos: {json.dumps(claims_relevantes, indent=2)}")
+    except Exception as e:
+        log.warning(f"No se pudo decodificar JWT: {e}")
+
+    # Para este test apuntamos directamente a la 208 (spotId "bbbaaaa")
+    cocheras_test = ["bbbaaaa"]
     reservado = False
-    for cochera in COCHERAS_PRIORIDAD:
+    for cochera in cocheras_test:
         log.info(f"Intentando cochera {cochera}...")
         try:
             if reservar_via_api(token, cochera, fecha, PARKALOT_UID):

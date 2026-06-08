@@ -15,7 +15,7 @@ import time
 import logging
 import urllib.request
 import urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 import pytz
 import httpx
 
@@ -28,8 +28,12 @@ PARKALOT_API_KEY       = os.environ.get("PARKALOT_API_KEY", "")
 WHATSAPP_PHONE  = os.environ.get("WHATSAPP_PHONE", "")
 WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 
-# Orden de prioridad de cocheras
-COCHERAS_PRIORIDAD = [209, 208, 237]
+# Orden de prioridad de cocheras (string IDs internos de Parkalot)
+# 209 → "bbbaaaaa"  |  208 → "bbbaaaa"  |  237 → pendiente (spotId desconocido)
+COCHERAS_PRIORIDAD = ["bbbaaaaa", "bbbaaaa"]
+
+PARKALOT_PARKING_ID = "PCqwPBZi8Lfy340HLHm0hgThVig1"
+PARKALOT_V          = "xKpQV"
 
 # Días en que corre el script (para reservar el día siguiente hábil)
 # Domingo=6, Lunes=0, Martes=1, Miércoles=2, Jueves=3
@@ -41,10 +45,12 @@ MINUTO_APERTURA = 0
 INTERVALO_REINTENTO_SEG = 5
 TIMEOUT_ESPERA_MIN = 10
 
+_EPOCH = date(1970, 1, 1)
+
 FIREBASE_TOKEN_URL   = "https://securetoken.googleapis.com/v1/token"
 PARKALOT_RESERVE_URL = (
     "https://us-central1-project-3687381701726997562.cloudfunctions.net"
-    "/reservationsservice/assign"
+    "/reserve3"
 )
 
 logging.basicConfig(
@@ -114,7 +120,7 @@ def renovar_token(refresh_token: str, api_key: str) -> str:
     return id_token
 
 
-def reservar_via_api(token: str, spot_id: int, fecha: str, uid: str) -> bool:
+def reservar_via_api(token: str, spot_id: str, fecha: str, uid: str) -> bool:
     """
     Intenta reservar spot_id para la fecha dada.
     Retorna True si exitoso, False si el spot está ocupado (409/403).
@@ -123,11 +129,16 @@ def reservar_via_api(token: str, spot_id: int, fecha: str, uid: str) -> bool:
     Errores 5xx: reintenta una vez tras 1s antes de abortar.
     Error 401: aborta inmediatamente — no hay tiempo para re-login a las 16:00.
     """
+    day_int = (date.fromisoformat(fecha) - _EPOCH).days
     payload = {
-        "day": fecha,
+        "me": uid,
+        "parkingId": PARKALOT_PARKING_ID,
+        "addShifts": ["00002400"],
+        "day": day_int,
+        "removeShifts": [],
         "spotId": spot_id,
-        "shifts": ["00002400"],
         "uid": uid,
+        "v": PARKALOT_V,
     }
     headers = {"Authorization": f"Bearer {token}"}
 
