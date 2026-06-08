@@ -64,6 +64,10 @@ def main():
             log.warning("⚠️  LOS UIDs NO COINCIDEN — este es el motivo del 401")
         else:
             log.info("✅ UIDs coinciden")
+        # Loguear todos los claims para detectar custom claims que Parkalot requiera
+        claims_relevantes = {k: v for k, v in jwt_payload.items()
+                             if k not in ("iat", "exp", "auth_time")}
+        log.info(f"Claims JWT completos: {json.dumps(claims_relevantes, indent=2)}")
     except Exception as e:
         log.warning(f"No se pudo decodificar JWT: {e}")
 
