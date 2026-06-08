@@ -29,8 +29,8 @@ WHATSAPP_PHONE  = os.environ.get("WHATSAPP_PHONE", "")
 WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 
 # Orden de prioridad de cocheras (string IDs internos de Parkalot)
-# 209 → "bbbaaaaa"  |  208 → "bbbaaaa"  |  237 → pendiente confirmar
-COCHERAS_PRIORIDAD = ["bbbaaaaa", "bbbaaaa", "???"]
+# 209 → "bbbaaaaa"  |  208 → "bbbaaaa"  |  237 → pendiente (spotId desconocido)
+COCHERAS_PRIORIDAD = ["bbbaaaaa", "bbbaaaa"]
 
 PARKALOT_PARKING_ID = "PCqwPBZi8Lfy340HLHm0hgThVig1"
 PARKALOT_V          = "xKpQV"
