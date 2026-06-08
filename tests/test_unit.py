@@ -182,7 +182,7 @@ class TestReservarViaApi:
 
     def test_lanza_error_en_401(self):
         with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(401)):
-            with pytest.raises(RuntimeError, match="401"):
+            with pytest.raises(rc.TokenInvalidoError):
                 rc.reservar_via_api("tok-invalido", 209, "2026-06-04", "uid-abc")
 
     def test_reintenta_una_vez_en_500_y_retorna_true(self):

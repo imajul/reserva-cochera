@@ -55,6 +55,10 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
+class TokenInvalidoError(Exception):
+    pass
+
+
 def ahora_arg() -> datetime:
     return datetime.now(TZ_ARG)
 
@@ -146,9 +150,8 @@ def reservar_via_api(token: str, spot_id: int, fecha: str, uid: str) -> bool:
         return False
 
     if resp.status_code == 401:
-        raise RuntimeError(
-            f"Token inválido (401) — abortando para no perder la ventana de las 16:00"
-        )
+        log.warning(f"Cochera {spot_id}: 401 Unauthorized — body: {resp.text[:300]}")
+        raise TokenInvalidoError("401 Unauthorized")
 
     if resp.status_code >= 500:
         log.warning(f"Error de servidor {resp.status_code} en cochera {spot_id} — reintentando en 1s...")
@@ -211,8 +214,8 @@ def main():
         )
 
         seg_hasta_apertura = (apertura - ahora_actual).total_seconds()
-        if seg_hasta_apertura > 0.05:
-            espera = min(seg_hasta_apertura - 0.05, INTERVALO_REINTENTO_SEG)
+        if seg_hasta_apertura > 0:
+            espera = min(seg_hasta_apertura, INTERVALO_REINTENTO_SEG)
             if espera > 1:
                 log.info(f"Esperando apertura de las {apertura.strftime('%H:%M')} (faltan {seg_hasta_apertura:.0f}s)...")
             time.sleep(espera)
@@ -226,6 +229,16 @@ def main():
                     reservado = True
                     enviar_whatsapp(f"✅ Cochera {cochera} reservada para el {fecha} 🚗")
                     break
+        except TokenInvalidoError:
+            log.warning(f"Token rechazado en intento #{intentos} — renovando y reintentando en 2s...")
+            try:
+                token = renovar_token(PARKALOT_REFRESH_TOKEN, PARKALOT_API_KEY)
+            except Exception as e:
+                log.error(f"No se pudo renovar token tras 401: {e}")
+                enviar_whatsapp(f"❌ Error de autenticación al reservar cochera para el {fecha}. Revisá el log.")
+                sys.exit(1)
+            time.sleep(2)
+            continue
         except RuntimeError as e:
             log.error(f"Error en intento #{intentos}: {e}")
             enviar_whatsapp(f"❌ Error al reservar cochera para el {fecha}: {e}")
