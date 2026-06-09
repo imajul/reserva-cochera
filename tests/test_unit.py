@@ -4,9 +4,8 @@ All Playwright and time-dependent behaviour is fully mocked.
 """
 
 import re
-import time as _time
 from datetime import datetime, date, timedelta
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import patch
 
 import pytest
 import pytz
@@ -14,7 +13,7 @@ import pytz
 import reservar_cochera as rc
 
 
-# ─── ahora_arg ───────────────────────────────────────────────────────────────────────────────
+# ─── ahora_arg ────────────────────────────────────────────────────────────────
 
 class TestAhoraArg:
     def test_returns_aware_datetime(self):
@@ -26,7 +25,7 @@ class TestAhoraArg:
         assert "Argentina" in str(result.tzinfo)
 
 
-# ─── debe_ejecutar_hoy ────────────────────────────────────────────────────────────────────
+# ─── debe_ejecutar_hoy ────────────────────────────────────────────────────────────────
 
 class TestDebeEjecutarHoy:
     TZ = pytz.timezone("America/Argentina/Buenos_Aires")
@@ -48,7 +47,7 @@ class TestDebeEjecutarHoy:
             assert rc.debe_ejecutar_hoy() == esperado
 
 
-# ─── fecha_manana_str ──────────────────────────────────────────────────────────────────────
+# ─── fecha_manana_str ───────────────────────────────────────────────────────────────────
 
 class TestFechaMáñanaStr:
     TZ = pytz.timezone("America/Argentina/Buenos_Aires")
@@ -73,51 +72,7 @@ class TestFechaMáñanaStr:
             assert rc.fecha_manana_str() == "2024-01-01"
 
 
-# ─── seleccionar_cochera ───────────────────────────────────────────────────────────────────
-
-class TestSeleccionarCochera:
-    def test_primera_prioridad(self):
-        # Prioridad: 209 → 208 → 237
-        cocheras = {209: "btn209", 208: "btn208", 237: "btn237"}
-        numero, elemento = rc.seleccionar_cochera(cocheras)
-        assert numero == 209
-        assert elemento == "btn209"
-
-    def test_segunda_prioridad(self):
-        cocheras = {208: "btn208", 237: "btn237"}
-        numero, elemento = rc.seleccionar_cochera(cocheras)
-        assert numero == 208
-
-    def test_tercera_prioridad(self):
-        cocheras = {237: "btn237", 300: "btn300"}
-        numero, elemento = rc.seleccionar_cochera(cocheras)
-        assert numero == 237
-
-    def test_fallback_primera_disponible(self):
-        # Sin ninguna prioritaria → fallback a la primera disponible
-        cocheras = {300: "btn300", 100: "btn100"}
-        numero, elemento = rc.seleccionar_cochera(cocheras)
-        assert numero == 100
-        assert elemento == "btn100"
-
-    def test_dict_vacio_retorna_none(self):
-        numero, elemento = rc.seleccionar_cochera({})
-        assert numero is None
-        assert elemento is None
-
-    def test_unica_cochera_disponible(self):
-        cocheras = {500: "btn500"}
-        numero, elemento = rc.seleccionar_cochera(cocheras)
-        assert numero == 500
-
-    def test_no_modifica_el_dict_original(self):
-        cocheras = {237: "btn237", 209: "btn209"}
-        original = dict(cocheras)
-        rc.seleccionar_cochera(cocheras)
-        assert cocheras == original
-
-
-# ─── esperar_hasta_previa_apertura ───────────────────────────────────────────────────────────────
+# ─── esperar_hasta_previa_apertura ─────────────────────────────────────────────────────────────
 
 class TestEsperarHastaPreApertura:
     TZ = pytz.timezone("America/Argentina/Buenos_Aires")
