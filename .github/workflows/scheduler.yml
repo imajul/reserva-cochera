@@ -4,7 +4,7 @@ name: Reserva Automática Cochera
 # via workflow_dispatch para garantizar puntualidad.
 # Endpoint: POST https://api.github.com/repos/imajul/reserva-cochera/actions/workflows/scheduler.yml/dispatches
 # Body: {"ref": "main", "inputs": {"modo": "produccion"}}
-# Horario: 55 18 * * 0,1,2,4  (18:55 UTC = 15:55 ARG — Dom, Lun, Mar, Mié, Jue)
+# Horario: 55 18 * * 0,1,2,3,4  (18:55 UTC = 15:55 ARG — Dom, Lun, Mar, Mié, Jue)
 
 on:
   workflow_dispatch:
@@ -38,7 +38,7 @@ jobs:
     needs: unit-tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: false  # PAUSADO — reactivar cuando Parkalot confirme que la cuenta no está bloqueada
+    if: false  # PAUSADO — reactivar cuando se confirme que la cuenta no está bloqueada en Parkalot
 
     steps:
       - uses: actions/checkout@v4
@@ -47,21 +47,31 @@ jobs:
           python-version: "3.11"
       - name: Instalar dependencias
         run: pip install -r requirements.txt
+      - name: Instalar Chromium
+        run: |
+          playwright install chromium
+          playwright install-deps chromium
       - name: Ejecutar en modo PRODUCCIÓN
         if: inputs.modo == 'produccion'
         env:
-          PARKALOT_REFRESH_TOKEN: ${{ secrets.PARKALOT_REFRESH_TOKEN }}
-          PARKALOT_UID:           ${{ secrets.PARKALOT_UID }}
-          PARKALOT_API_KEY:       ${{ secrets.PARKALOT_API_KEY }}
-          WHATSAPP_PHONE:         ${{ secrets.WHATSAPP_PHONE }}
-          WHATSAPP_APIKEY:        ${{ secrets.WHATSAPP_APIKEY }}
+          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+          WHATSAPP_PHONE:    ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY:   ${{ secrets.WHATSAPP_APIKEY }}
         run: python reservar_cochera.py
       - name: Ejecutar en modo TEST
         if: inputs.modo == 'test'
         env:
-          PARKALOT_REFRESH_TOKEN: ${{ secrets.PARKALOT_REFRESH_TOKEN }}
-          PARKALOT_UID:           ${{ secrets.PARKALOT_UID }}
-          PARKALOT_API_KEY:       ${{ secrets.PARKALOT_API_KEY }}
-          WHATSAPP_PHONE:         ${{ secrets.WHATSAPP_PHONE }}
-          WHATSAPP_APIKEY:        ${{ secrets.WHATSAPP_APIKEY }}
+          PARKALOT_EMAIL:    ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+          WHATSAPP_PHONE:    ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY:   ${{ secrets.WHATSAPP_APIKEY }}
         run: python test_reserva.py
+      - name: Subir screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ inputs.modo }}-${{ github.run_id }}
+          path: "*.png"
+          if-no-files-found: ignore
+          retention-days: 7

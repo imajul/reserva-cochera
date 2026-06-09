@@ -1,4 +1,4 @@
-httpx
+playwright
 pytz
 pytest
 pytest-cov
