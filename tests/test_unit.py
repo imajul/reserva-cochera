@@ -1,12 +1,12 @@
 """
 Unit tests for reservar_cochera.py.
-All HTTP calls and time-dependent behaviour are fully mocked.
+All Playwright and time-dependent behaviour is fully mocked.
 """
 
 import re
 import time as _time
 from datetime import datetime, date, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 
 import pytest
 import pytz
@@ -14,7 +14,7 @@ import pytz
 import reservar_cochera as rc
 
 
-# ─── ahora_arg ────────────────────────────────────────────────────────────────
+# ─── ahora_arg ───────────────────────────────────────────────────────────────────────────────
 
 class TestAhoraArg:
     def test_returns_aware_datetime(self):
@@ -26,7 +26,7 @@ class TestAhoraArg:
         assert "Argentina" in str(result.tzinfo)
 
 
-# ─── debe_ejecutar_hoy ────────────────────────────────────────────────────────
+# ─── debe_ejecutar_hoy ────────────────────────────────────────────────────────────────────
 
 class TestDebeEjecutarHoy:
     TZ = pytz.timezone("America/Argentina/Buenos_Aires")
@@ -48,9 +48,9 @@ class TestDebeEjecutarHoy:
             assert rc.debe_ejecutar_hoy() == esperado
 
 
-# ─── fecha_manana_str ─────────────────────────────────────────────────────────
+# ─── fecha_manana_str ──────────────────────────────────────────────────────────────────────
 
-class TestFechaMañanaStr:
+class TestFechaMáñanaStr:
     TZ = pytz.timezone("America/Argentina/Buenos_Aires")
 
     def _dt(self, year, month, day):
@@ -73,7 +73,51 @@ class TestFechaMañanaStr:
             assert rc.fecha_manana_str() == "2024-01-01"
 
 
-# ─── esperar_hasta_previa_apertura ────────────────────────────────────────────
+# ─── seleccionar_cochera ───────────────────────────────────────────────────────────────────
+
+class TestSeleccionarCochera:
+    def test_primera_prioridad(self):
+        # Prioridad: 209 → 208 → 237
+        cocheras = {209: "btn209", 208: "btn208", 237: "btn237"}
+        numero, elemento = rc.seleccionar_cochera(cocheras)
+        assert numero == 209
+        assert elemento == "btn209"
+
+    def test_segunda_prioridad(self):
+        cocheras = {208: "btn208", 237: "btn237"}
+        numero, elemento = rc.seleccionar_cochera(cocheras)
+        assert numero == 208
+
+    def test_tercera_prioridad(self):
+        cocheras = {237: "btn237", 300: "btn300"}
+        numero, elemento = rc.seleccionar_cochera(cocheras)
+        assert numero == 237
+
+    def test_fallback_primera_disponible(self):
+        # Sin ninguna prioritaria → fallback a la primera disponible
+        cocheras = {300: "btn300", 100: "btn100"}
+        numero, elemento = rc.seleccionar_cochera(cocheras)
+        assert numero == 100
+        assert elemento == "btn100"
+
+    def test_dict_vacio_retorna_none(self):
+        numero, elemento = rc.seleccionar_cochera({})
+        assert numero is None
+        assert elemento is None
+
+    def test_unica_cochera_disponible(self):
+        cocheras = {500: "btn500"}
+        numero, elemento = rc.seleccionar_cochera(cocheras)
+        assert numero == 500
+
+    def test_no_modifica_el_dict_original(self):
+        cocheras = {237: "btn237", 209: "btn209"}
+        original = dict(cocheras)
+        rc.seleccionar_cochera(cocheras)
+        assert cocheras == original
+
+
+# ─── esperar_hasta_previa_apertura ───────────────────────────────────────────────────────────────
 
 class TestEsperarHastaPreApertura:
     TZ = pytz.timezone("America/Argentina/Buenos_Aires")
@@ -113,105 +157,3 @@ class TestEsperarHastaPreApertura:
                 mock_time.sleep.assert_called_once()
                 segundos = mock_time.sleep.call_args[0][0]
                 assert abs(segundos - 57590) < 2
-
-
-# ─── renovar_token ────────────────────────────────────────────────────────────
-
-class TestRenovarToken:
-    def _mock_resp(self, status_code, json_data=None, text=""):
-        resp = MagicMock()
-        resp.status_code = status_code
-        resp.json.return_value = json_data or {}
-        resp.text = text
-        return resp
-
-    def test_retorna_id_token_en_200(self):
-        resp = self._mock_resp(200, {"id_token": "token-fresco-abc123"})
-        with patch("reservar_cochera.httpx.post", return_value=resp):
-            token = rc.renovar_token("refresh-tok", "api-key-123")
-        assert token == "token-fresco-abc123"
-
-    def test_llama_endpoint_correcto(self):
-        resp = self._mock_resp(200, {"id_token": "tok"})
-        with patch("reservar_cochera.httpx.post", return_value=resp) as mock_post:
-            rc.renovar_token("my-refresh", "my-api-key")
-        url = mock_post.call_args[0][0]
-        assert "securetoken.googleapis.com" in url
-        assert "my-api-key" in url
-        data = mock_post.call_args[1]["data"]
-        assert data["grant_type"] == "refresh_token"
-        assert data["refresh_token"] == "my-refresh"
-
-    def test_lanza_error_en_400(self):
-        resp = self._mock_resp(400, text="TOKEN_EXPIRED")
-        with patch("reservar_cochera.httpx.post", return_value=resp):
-            with pytest.raises(RuntimeError, match="400"):
-                rc.renovar_token("bad-token", "api-key")
-
-    def test_lanza_error_si_falta_id_token(self):
-        resp = self._mock_resp(200, json_data={"refresh_token": "algo"})
-        with patch("reservar_cochera.httpx.post", return_value=resp):
-            with pytest.raises(RuntimeError, match="id_token"):
-                rc.renovar_token("tok", "key")
-
-
-# ─── reservar_via_api ─────────────────────────────────────────────────────────
-
-class TestReservarViaApi:
-    def _mock_resp(self, status_code, text="ok"):
-        resp = MagicMock()
-        resp.status_code = status_code
-        resp.text = text
-        return resp
-
-    def test_retorna_true_en_200(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(200)):
-            assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is True
-
-    def test_retorna_true_en_201(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(201)):
-            assert rc.reservar_via_api("tok", "bbbaaaa", "2026-06-04", "uid-abc") is True
-
-    def test_retorna_false_en_409_spot_ocupado(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(409)):
-            assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is False
-
-    def test_retorna_false_en_403(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(403)):
-            assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is False
-
-    def test_lanza_error_en_401(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(401)):
-            with pytest.raises(rc.TokenInvalidoError):
-                rc.reservar_via_api("tok-invalido", "bbbaaaaa", "2026-06-04", "uid-abc")
-
-    def test_reintenta_una_vez_en_500_y_retorna_true(self):
-        responses = [self._mock_resp(500), self._mock_resp(200)]
-        with patch("reservar_cochera.httpx.post", side_effect=responses):
-            with patch("reservar_cochera.time"):
-                assert rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc") is True
-
-    def test_lanza_error_en_500_persistente(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(503, "service unavailable")):
-            with patch("reservar_cochera.time"):
-                with pytest.raises(RuntimeError, match="503"):
-                    rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc")
-
-    def test_lanza_error_en_respuesta_inesperada(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(422, "unprocessable")):
-            with pytest.raises(RuntimeError, match="422"):
-                rc.reservar_via_api("tok", "bbbaaaaa", "2026-06-04", "uid-abc")
-
-    def test_payload_correcto(self):
-        with patch("reservar_cochera.httpx.post", return_value=self._mock_resp(200)) as mock_post:
-            rc.reservar_via_api("mi-token", "bbbaaaaa", "2026-06-04", "mi-uid")
-        kwargs = mock_post.call_args[1]
-        from datetime import date
-        assert kwargs["json"]["day"] == (date(2026, 6, 4) - date(1970, 1, 1)).days
-        assert kwargs["json"]["spotId"] == "bbbaaaaa"
-        assert kwargs["json"]["addShifts"] == ["00002400"]
-        assert kwargs["json"]["removeShifts"] == []
-        assert kwargs["json"]["uid"] == "mi-uid"
-        assert kwargs["json"]["me"] == "mi-uid"
-        assert kwargs["json"]["parkingId"] == rc.PARKALOT_PARKING_ID
-        assert kwargs["headers"]["Authorization"] == "Bearer mi-token"
