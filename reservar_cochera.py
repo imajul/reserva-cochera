@@ -279,6 +279,11 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             cocheras_a_intentar.append(c)
     log.info(f"Orden de intentos: {cocheras_a_intentar}")
 
+    # Parkalot muestra todos los botones en gris (deshabilitados) durante los primeros
+    # segundos después de las 16:00 mientras procesa la apertura de la ventana de reservas.
+    # Esta flag evita descartar cocheras disponibles durante esa transición.
+    sistema_abierto = False
+
     for cochera_num in cocheras_a_intentar:
         elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
@@ -322,16 +327,20 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            habilitado = False
-            for _ in range(2):
-                page.wait_for_timeout(300)
-                if reserve_btn.is_enabled():
-                    habilitado = True
-                    break
-            if not habilitado:
+            if not sistema_abierto:
+                # Puede ser el estado gris de transición: esperar hasta 8s
+                log.info(f"Cochera {cochera_num}: RESERVE deshabilitado — esperando apertura del sistema (hasta 8s)...")
+                for _ in range(16):
+                    page.wait_for_timeout(500)
+                    if reserve_btn.is_enabled():
+                        break
+            sistema_abierto = True
+            if not reserve_btn.is_enabled():
                 log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
                 screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
                 continue
+        else:
+            sistema_abierto = True
 
         log.info(f"Cochera {cochera_num} disponible — reservando...")
         screenshot(page, f"{prefix}_pre_reserve_{cochera_num}")
