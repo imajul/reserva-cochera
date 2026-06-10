@@ -234,12 +234,12 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
                     continue
 
             cocheras_disponibles.update(items_esta_iter)
-            log.info(f"  scroll iter {scroll_iter}: {len(items_esta_iter)} ítems → {sorted(items_esta_iter.keys())}")
+            log.info(f"  scroll iter {scroll_iter}: {len(items_esta_iter)} ítems en viewport → acumulado {sorted(cocheras_disponibles.keys())}")
             screenshot(page, f"{prefix}_scroll_{scroll_iter:02d}")
 
-            if len(items_esta_iter) == n_previo:
+            if len(cocheras_disponibles) == n_previo:
                 break
-            n_previo = len(items_esta_iter)
+            n_previo = len(cocheras_disponibles)
 
             if all(p in cocheras_disponibles for p in COCHERAS_PRIORIDAD):
                 log.info("Cocheras prioritarias localizadas — deteniendo scroll")
