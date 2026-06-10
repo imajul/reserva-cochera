@@ -17,17 +17,15 @@ Sistema que reserva automáticamente cocheras en Parkalot cada día hábil a las
 
 | Prioridad | Cochera |
 |-----------|---------|
-| 1°        | 237     |
-| 2°        | 209     |
-| 3°        | 208     |
-| 4°        | 238     |
-| 5°        | Primera disponible en la lista |
+| 1°        | 209     |
+| 2°        | 208     |
+| 3°        | 237     |
 
 **Estrategia de ejecución:**
-- Arranca a las **15:55 ARG** y hace login
+- Arranca a las **15:55 ARG** y renueva el token de Firebase
 - Espera activamente hasta las **16:00** en que se habilitan las reservas
-- En cuanto se habilitan, intenta reservar según el orden de prioridad
-- Si aparecen dos tarjetas de días (hoy + mañana), siempre selecciona la del **día siguiente**
+- A las 16:00 llama directamente a la API de Parkalot (sin browser) en orden de prioridad
+- Si una cochera está ocupada, pasa a la siguiente en ~200ms
 - Reintenta cada 5 segundos durante 10 minutos si la reserva aún no está disponible
 
 ---
@@ -37,12 +35,10 @@ Sistema que reserva automáticamente cocheras en Parkalot cada día hábil a las
 ```
 reserva-cochera/
 ├── reservar_cochera.py          → Script principal (producción)
-├── test_reserva.py              → Script de prueba (reserva inmediata, sin esperar 16:00)
-├── requirements.txt             → Dependencias Python
+├── requirements.txt             → Dependencias Python (httpx, pytz)
 ├── pytest.ini                   → Configuración de tests
 ├── tests/
-│   ├── conftest.py              → Mock de Playwright para tests unitarios
-│   └── test_unit.py             → 26 tests unitarios
+│   └── test_unit.py             → Tests unitarios
 └── .github/
     └── workflows/
         └── scheduler.yml        → Workflow de GitHub Actions
@@ -61,25 +57,29 @@ cron-job.org (scheduler externo — puntualidad garantizada)
 ▼
 GitHub Actions (servidor de ejecución)
 │
-├── Job: Tests unitarios (26 tests — gate de calidad)
+├── Job: Tests unitarios (gate de calidad)
 │
 └── Job: Reserva (modo produccion / test)
     └── reservar_cochera.py
-        ├── 15:55 → Login en Parkalot
+        ├── 15:55 → Renueva Firebase ID Token via securetoken.googleapis.com
         ├── 15:55–16:00 → Espera activa
-        ├── 16:00 → Click en DETAILS del día siguiente
-        ├── Busca cocheras: 237 → 209 → 208 → 238 → primera disponible
-        └── Click en RESERVE → Confirmación
+        └── 16:00 → POST directo a Cloud Function de Parkalot
+                      209 → si ocupada → 208 → si ocupada → 237
+                      Éxito: WhatsApp de confirmación
+                      Fallo total: WhatsApp de alerta + exit 1
 ```
 
 > **¿Por qué cron-job.org y no el cron interno de GitHub Actions?**
 > GitHub Actions puede demorar 30–60 minutos en ejecutar un cron programado bajo alta carga. Como la ventana de reserva de Parkalot abre exactamente a las 16:00, cualquier demora significa perder el turno. cron-job.org garantiza la llamada puntual al minuto.
 
+> **¿Por qué llamada HTTP directa y no automatización de browser?**
+> Parkalot usa Firebase + Cloud Functions como backend. Llamar directamente a la API elimina la dependencia del DOM, el scroll virtual de MUI, y el tiempo de carga del browser. La reserva se hace en ~1 segundo en lugar de ~20 segundos.
+
 ---
 
 ## Configuración para quien clona este repositorio
 
-Si alguien te compartió acceso a este repo y querés que funcione en tu cuenta, solo necesitás hacer estas 3 cosas — el código ya está listo.
+Si querés que funcione en tu cuenta, necesitás hacer estas 3 cosas — el código ya está listo.
 
 ### 1 — Forkeá el repositorio
 
@@ -87,19 +87,31 @@ Si alguien te compartió acceso a este repo y querés que funcione en tu cuenta,
 2. Click en **"Fork"** (arriba a la derecha)
 3. Seleccioná tu cuenta como destino → **"Create fork"**
 
-> Alternativamente podés clonarlo y subirlo a un nuevo repo privado tuyo.
-
 ---
 
-### 2 — Guardá tus credenciales de Parkalot
+### 2 — Obtené tus credenciales de Parkalot
 
-1. En **tu fork** → **Settings** → **Secrets and variables** → **Actions**
-2. Click en **"New repository secret"** y creá estos dos con tus propios datos:
+Necesitás tres valores de tu cuenta. Para obtenerlos:
 
-| Nombre exacto        | Valor                      |
-|---------------------|---------------------------|
-| `PARKALOT_EMAIL`    | Tu email de Parkalot      |
-| `PARKALOT_PASSWORD` | Tu contraseña de Parkalot |
+1. Abrí Chrome y logueate en [app.parkalot.io](https://app.parkalot.io)
+2. Abrí DevTools (F12) → pestaña **Application** → **IndexedDB** → **firebaseLocalStorageDb** → **firebaseLocalStorage**
+3. Click en el registro que aparece y expandí el objeto `value`:
+
+| Dato | Dónde encontrarlo |
+|------|-------------------|
+| `uid` | `value.uid` |
+| `refreshToken` | `value.stsTokenManager.refreshToken` |
+| `apiKey` | `value.apiKey` (empieza con `AIza...`) |
+
+Luego, en tu fork → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+
+| Nombre exacto              | Valor                          |
+|---------------------------|-------------------------------|
+| `PARKALOT_REFRESH_TOKEN`  | El `refreshToken` obtenido     |
+| `PARKALOT_UID`            | El `uid` obtenido              |
+| `PARKALOT_API_KEY`        | El `apiKey` obtenido           |
+| `WHATSAPP_PHONE`          | Tu número (ej: `5491112345678`) — opcional |
+| `WHATSAPP_APIKEY`         | Tu API key de CallMeBot — opcional |
 
 ---
 
@@ -144,130 +156,25 @@ Necesitás tu propio scheduler porque el de quien te compartió el repo apunta a
 
 5. Click en **"Create"** y probá con **"Run now"** → debe responder `204 No Content`
 
-#### 3c — Verificar que todo funciona
-
-1. Ir a la pestaña **Actions** de tu fork
-2. Click en **"Reserva Automática Cochera"** → **"Run workflow"**
-3. Elegir **`test`** y click en el botón verde
-4. Esperá ~2 minutos:
-   - ✅ Verde = todo configurado correctamente
-   - ❌ Rojo = revisá que los Secrets estén bien cargados
-
----
-
-## Configuración desde cero
-
-### Paso 1 — Crear cuenta en GitHub
-Si no tenés, creá una gratis en [github.com](https://github.com).
-
----
-
-### Paso 2 — Crear un repositorio privado
-
-1. Click en **"+" → "New repository"**
-2. Nombre: `reserva-cochera`
-3. Seleccioná **"Private"** ⚠️
-4. Click en **"Create repository"**
-
----
-
-### Paso 3 — Subir los archivos
-
-1. Click en **"Add file" → "Upload files"**
-2. Subí todos los archivos del proyecto
-3. Click en **"Commit changes"**
-
----
-
-### Paso 4 — Guardar credenciales de Parkalot
-
-1. En tu repositorio → **Settings** → **Secrets and variables** → **Actions**
-2. Click en **"New repository secret"** y creá estos dos:
-
-| Nombre exacto        | Valor                      |
-|---------------------|---------------------------|
-| `PARKALOT_EMAIL`    | Tu email de Parkalot      |
-| `PARKALOT_PASSWORD` | Tu contraseña de Parkalot |
-
-Los valores quedan encriptados — nadie puede verlos una vez guardados.
-
----
-
-### Paso 5 — Configurar cron-job.org
-
-#### 5a — Crear un GitHub Personal Access Token
-
-1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
-2. Click en **"Generate new token"**
-3. Completá:
-   - **Token name:** `cron-job-reserva-cochera`
-   - **Expiration:** 1 año
-   - **Repository access:** Only select repositories → `reserva-cochera`
-   - **Permissions → Repository permissions → Actions:** `Read and write`
-4. Click en **"Generate token"** y guardalo en un gestor de contraseñas (se muestra una sola vez)
-
-#### 5b — Crear el cron en cron-job.org
-
-1. Creá una cuenta gratuita en [cron-job.org](https://cron-job.org)
-2. Click en **"Create cronjob"** y completá:
-
-| Campo | Valor |
-|-------|-------|
-| **URL** | `https://api.github.com/repos/TU_USUARIO/reserva-cochera/actions/workflows/scheduler.yml/dispatches` |
-| **Método** | `POST` |
-| **Horario** | `55 18 * * 0,1,2,4` |
-
-3. En **Headers**, agregá estos tres:
-
-| Key | Value |
-|-----|-------|
-| `Authorization` | `Bearer TU_TOKEN` |
-| `Content-Type` | `application/json` |
-| `Accept` | `application/vnd.github.v3+json` |
-
-4. En **Request body**:
-```json
-{"ref": "main", "inputs": {"modo": "produccion"}}
-```
-
-5. Click en **"Create"**
-6. Probá con **"Run now"** → debe responder `204 No Content`
-
----
-
-### Paso 6 — Verificar que funciona
-
-Para una prueba manual sin esperar el horario:
-
-1. Ir a la pestaña **Actions** del repositorio
-2. Click en **"Reserva Automática Cochera"** → **"Run workflow"**
-3. Elegir **`test`** y click en el botón verde
-4. Esperá ~2 minutos y verificá el resultado:
-   - ✅ Verde = reserva exitosa
-   - ❌ Rojo = algo falló, click para ver el log
-
-Los screenshots de cada ejecución se guardan como artefactos en el run (sección **Artifacts** al final de cada ejecución).
-
 ---
 
 ## Solución de problemas
 
-### ❌ Error en el login
-- Verificá los Secrets en Settings — no deben tener espacios extra
-- Probá loguearte manualmente en [app.parkalot.io](https://app.parkalot.io)
-
-### ❌ No encuentra las cocheras
-Parkalot puede actualizar su interfaz. Descargá el screenshot del error para ver en qué pantalla falló.
+### ❌ Error de autenticación (token inválido)
+El `refreshToken` de Firebase puede ser revocado si cambiás tu contraseña de Parkalot o cerrás sesión en todos los dispositivos. En ese caso:
+1. Logueate de nuevo en [app.parkalot.io](https://app.parkalot.io)
+2. Extraé el nuevo `refreshToken` desde DevTools (mismo proceso que en el paso 2)
+3. Actualizá el secret `PARKALOT_REFRESH_TOKEN` en GitHub
 
 ### ❌ El workflow no se dispara a las 16:00
 - Verificá en cron-job.org que el último run devolvió `204 No Content`
-- Confirmá que el token no expiró (duran 1 año por defecto)
+- Confirmá que el GitHub token no expiró (duran 1 año por defecto)
 - Revisá que la URL del webhook tenga tu usuario correcto
 
 ### ⚠️ Cambiar el orden de prioridad de cocheras
 En `reservar_cochera.py`:
 ```python
-COCHERAS_PRIORIDAD = [237, 209, 208, 238]
+COCHERAS_PRIORIDAD = [209, 208, 237]  # De mayor a menor preferencia
 ```
 
 ### ⚠️ Cambiar los días de reserva

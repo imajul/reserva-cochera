@@ -8,7 +8,7 @@ Flujo:
   5. Click en la cochera → Click en RESERVE
 
 Días de ejecución: domingo a jueves (para reservar lunes a viernes).
-Orden de prioridad: 208 → 237 → 238 → primera disponible en la lista.
+Orden de prioridad: 209 → 208 → 237 → primera disponible en la lista.
 """
 
 import os
@@ -30,8 +30,8 @@ PASSWORD        = os.environ.get("PARKALOT_PASSWORD", "")
 WHATSAPP_PHONE  = os.environ.get("WHATSAPP_PHONE", "")   # Ej: 5491112345678
 WHATSAPP_APIKEY = os.environ.get("WHATSAPP_APIKEY", "")
 
-# Orden de prioridad de cocheras (209 eliminada — asignada por el admin)
-COCHERAS_PRIORIDAD = [208, 237, 238]
+# Orden de prioridad de cocheras
+COCHERAS_PRIORIDAD = [209, 208, 237]
 
 # Días en que corre el script (para reservar el día siguiente hábil)
 # Domingo=6, Lunes=0, Martes=1, Miércoles=2, Jueves=3
@@ -81,7 +81,7 @@ def esperar_hasta_previa_apertura():
     pre_apertura = apertura - timedelta(seconds=10)
     if ahora < pre_apertura:
         espera_seg = (pre_apertura - ahora).total_seconds()
-        log.info(f"Son las {ahora.strftime('%H:%M:%S')} ARG. Esperando hasta las 15:59:50 ({int(espera_seg)}s)...")
+        log.info(f"Son las {ahora.strftime('%H:%M:%S')} ARG. Esperando hasta las {pre_apertura.strftime('%H:%M:%S')} ({int(espera_seg)}s)...")
         time.sleep(espera_seg)
     log.info("Entrando en modo de espera activa...")
 
@@ -119,7 +119,6 @@ def login(page):
 
 
 def _ordinal_en(n: int) -> str:
-    """1→'1ST', 2→'2ND', 3→'3RD', 14→'14TH', etc."""
     if 11 <= n % 100 <= 13:
         suffix = "TH"
     else:
@@ -128,18 +127,11 @@ def _ordinal_en(n: int) -> str:
 
 
 def _corregir_fecha_si_necesario(page, prefix: str):
-    """
-    Verifica que la página de reserva muestre mañana.
-    Si muestra hoy, intenta corregirlo:
-      1) Reemplazando la fecha en la URL (si la URL la contiene)
-      2) Clickeando el botón de navegación siguiente ( > )
-    """
-    hoy   = ahora_arg().date()
+    hoy    = ahora_arg().date()
     manana = hoy + timedelta(days=1)
-    hoy_iso    = hoy.isoformat()     # "2026-05-14"
-    manana_iso = manana.isoformat()  # "2026-05-15"
+    hoy_iso    = hoy.isoformat()
+    manana_iso = manana.isoformat()
 
-    # ── Estrategia 1: URL contiene la fecha ──────────────────────────────
     url = page.url
     if manana_iso in url:
         log.info(f"Fecha correcta en URL: {manana_iso} ✓")
@@ -153,9 +145,8 @@ def _corregir_fecha_si_necesario(page, prefix: str):
         log.info("Fecha corregida por URL ✓")
         return
 
-    # ── Estrategia 2: detectar fecha en heading y click en botón siguiente ─
-    hoy_mes     = hoy.strftime("%B").upper()       # "MAY"
-    hoy_ordinal = _ordinal_en(hoy.day)             # "14TH"
+    hoy_mes     = hoy.strftime("%B").upper()
+    hoy_ordinal = _ordinal_en(hoy.day)
 
     try:
         textos = page.locator(
@@ -200,11 +191,6 @@ def _corregir_fecha_si_necesario(page, prefix: str):
 
 
 def click_details_del_dia(page, intento: int = 0) -> bool:
-    """
-    Hace click en el SEGUNDO botón DETAILS (el del día siguiente).
-    Cuando hay dos tarjetas visibles, la primera es el día de hoy
-    y la segunda es el día siguiente.
-    """
     prefix = f"intento_{intento:02d}"
     log.info("Buscando botones DETAILS...")
     page.wait_for_timeout(300)
@@ -213,14 +199,11 @@ def click_details_del_dia(page, intento: int = 0) -> bool:
         details_btns = page.get_by_text("DETAILS").all()
         log.info(f"Botones DETAILS encontrados: {len(details_btns)}")
         screenshot(page, f"{prefix}_details_encontrado")
-        # Siempre clickear el último (el del día siguiente)
         details_btns[-1].click()
         page.wait_for_load_state("domcontentloaded")
         page.wait_for_timeout(500)
         screenshot(page, f"{prefix}_post_details")
         log.info("Click en DETAILS ✓")
-
-        # Verificar que la página muestre mañana y no hoy
         _corregir_fecha_si_necesario(page, prefix)
         return True
     except PlaywrightTimeoutError:
@@ -229,30 +212,7 @@ def click_details_del_dia(page, intento: int = 0) -> bool:
         return False
 
 
-def seleccionar_cochera(cocheras_disponibles: dict):
-    """
-    Elige la cochera según orden de prioridad.
-    Retorna (numero, elemento) o (None, None) si el dict está vacío.
-    """
-    if not cocheras_disponibles:
-        return None, None
-
-    for cochera in COCHERAS_PRIORIDAD:
-        if cochera in cocheras_disponibles:
-            log.info(f"Cochera preferida disponible: {cochera} ✓")
-            return cochera, cocheras_disponibles[cochera]
-
-    primer_numero = sorted(cocheras_disponibles.keys())[0]
-    log.info(f"Ninguna cochera preferida disponible. Reservando la primera: {primer_numero}")
-    return primer_numero, cocheras_disponibles[primer_numero]
-
-
 def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
-    """
-    Itera las cocheras en orden de prioridad y reserva la primera disponible.
-    Si el botón RESERVE está deshabilitado (cochera ya reservada), pasa a la siguiente
-    inmediatamente sin esperar ningún timeout.
-    """
     prefix = f"intento_{intento:02d}"
     log.info("Obteniendo cocheras disponibles en la lista...")
     page.wait_for_timeout(300)
@@ -260,11 +220,6 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     cocheras_disponibles = {}
     try:
-        # Scroll incremental acumulando referencias en cada iteración.
-        # El scroll virtual de MUI evicta ítems del DOM al alejarse del viewport,
-        # por eso NO hacemos un scan final separado sino que acumulamos durante el scroll.
-        # Las referencias se actualizan en cada iter (la más reciente es la válida).
-        # Paramos en cuanto todas las cocheras prioritarias están en el dict.
         n_previo = -1
         for scroll_iter in range(10):
             todos = page.locator("button.MuiButtonBase-root:has(h6)").all()
@@ -278,15 +233,14 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
                 except (ValueError, Exception):
                     continue
 
-            cocheras_disponibles.update(items_esta_iter)  # ref más reciente gana
-            log.info(f"  scroll iter {scroll_iter}: {len(items_esta_iter)} ítems → {sorted(items_esta_iter.keys())}")
+            cocheras_disponibles.update(items_esta_iter)
+            log.info(f"  scroll iter {scroll_iter}: {len(items_esta_iter)} ítems en viewport → acumulado {sorted(cocheras_disponibles.keys())}")
             screenshot(page, f"{prefix}_scroll_{scroll_iter:02d}")
 
-            if len(items_esta_iter) == n_previo:
-                break  # recuento estabilizado — lista completa
-            n_previo = len(items_esta_iter)
+            if len(cocheras_disponibles) == n_previo:
+                break
+            n_previo = len(cocheras_disponibles)
 
-            # Parar antes de scrollear más si ya tenemos todas las prioritarias
             if all(p in cocheras_disponibles for p in COCHERAS_PRIORIDAD):
                 log.info("Cocheras prioritarias localizadas — deteniendo scroll")
                 break
@@ -307,7 +261,6 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     log.info(f"Cocheras en lista: {sorted(cocheras_disponibles.keys())}")
 
-    # Orden: primero las prioritarias, luego el resto ordenadas
     cocheras_a_intentar = [c for c in COCHERAS_PRIORIDAD if c in cocheras_disponibles]
     for c in sorted(cocheras_disponibles.keys()):
         if c not in cocheras_a_intentar:
@@ -318,8 +271,6 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
 
-        # Verificar que el nodo DOM no fue reciclado por el scroll virtual.
-        # Si el h6 muestra un número distinto al esperado, reubicar el elemento.
         try:
             num_en_dom = int(elemento.locator("h6").inner_text(timeout=500).strip())
         except Exception:
@@ -350,7 +301,6 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         page.wait_for_timeout(200)
         screenshot(page, f"{prefix}_cochera_{cochera_num}_sel")
 
-        # Verificar si el botón RESERVE existe y está habilitado
         reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
         try:
             reserve_btn.wait_for(timeout=3000)
@@ -360,9 +310,6 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            # Estado de transición (gris): esperar hasta 600ms antes de descartar.
-            # Por el momento en que el script llega (~16:00:03), el estado gris ya
-            # se resolvió; más de 2 intentos no cambia el resultado.
             habilitado = False
             for _ in range(2):
                 page.wait_for_timeout(300)
@@ -374,7 +321,6 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
                 screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
                 continue
 
-        # Cochera disponible — reservar
         log.info(f"Cochera {cochera_num} disponible — reservando...")
         screenshot(page, f"{prefix}_pre_reserve_{cochera_num}")
         reserve_btn.click()
@@ -387,7 +333,6 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
         page.wait_for_timeout(3000)
         screenshot(page, f"{prefix}_post_reserve_{cochera_num}")
 
-        # Confirmar popup si aparece
         try:
             confirm = page.locator(
                 "button:has-text('Confirm'), button:has-text('OK'), "
@@ -444,7 +389,6 @@ def main():
         try:
             login(page)
 
-            # Pre-posicionarse en el mapa antes de las 16:00
             en_mapa = False
             url_mapa = None
             log.info("Intentando pre-cargar el mapa de cocheras...")
@@ -452,7 +396,7 @@ def main():
                 if click_details_del_dia(page, 0):
                     en_mapa = True
                     url_mapa = page.url
-                    log.info(f"Pre-posicionado en el mapa ✓")
+                    log.info("Pre-posicionado en el mapa ✓")
                 else:
                     log.info("Mapa aún no disponible — se cargará en el loop principal.")
             except Exception:
