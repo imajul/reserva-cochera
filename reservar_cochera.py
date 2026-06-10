@@ -115,6 +115,18 @@ def login(page):
     page.wait_for_load_state("networkidle")
     page.wait_for_timeout(2000)
     screenshot(page, "02_post_login")
+
+    # Verificar que el login fue exitoso: el formulario debe desaparecer
+    try:
+        page.locator(
+            "input[type='email'], input[name='email'], "
+            "input[placeholder*='mail' i], input[formcontrolname='email']"
+        ).first.wait_for(state="hidden", timeout=3000)
+    except PlaywrightTimeoutError:
+        raise RuntimeError(
+            "Login falló: el formulario de email sigue visible. "
+            "Verificar credenciales PARKALOT_EMAIL / PARKALOT_PASSWORD."
+        )
     log.info("Sesión iniciada ✓")
 
 
