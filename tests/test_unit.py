@@ -170,7 +170,22 @@ class TestScreenshot:
     def test_llama_page_screenshot(self):
         mock_page = MagicMock()
         rc.screenshot(mock_page, "test_nombre")
-        mock_page.screenshot.assert_called_once_with(path="test_nombre.png", full_page=True)
+        mock_page.screenshot.assert_called_once()
+        _, kwargs = mock_page.screenshot.call_args
+        assert "test_nombre" in kwargs["path"]
+        assert kwargs["path"].endswith(".png")
+        assert kwargs["full_page"] is True
+
+    def test_path_incluye_contador_y_timestamp(self):
+        mock_page = MagicMock()
+        before = rc._screenshot_counter
+        rc.screenshot(mock_page, "mi_paso")
+        _, kwargs = mock_page.screenshot.call_args
+        path = kwargs["path"]
+        # formato: NNN_mi_paso_HHMMSS.png
+        import re
+        assert re.match(r"^\d{3}_mi_paso_\d{6}\.png$", path), f"path inesperado: {path}"
+        assert rc._screenshot_counter == before + 1
 
     def test_no_propaga_excepcion_si_screenshot_falla(self):
         mock_page = MagicMock()

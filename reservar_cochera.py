@@ -85,8 +85,13 @@ def esperar_hasta_previa_apertura():
         time.sleep(espera_seg)
     log.info("Entrando en modo de espera activa...")
 
+_screenshot_counter = 0
+
 def screenshot(page, nombre: str):
-    path = f"{nombre}.png"
+    global _screenshot_counter
+    _screenshot_counter += 1
+    ts = ahora_arg().strftime("%H%M%S")
+    path = f"{_screenshot_counter:03d}_{nombre}_{ts}.png"
     try:
         page.screenshot(path=path, full_page=True)
         log.info(f"📸 Screenshot: {path}")
