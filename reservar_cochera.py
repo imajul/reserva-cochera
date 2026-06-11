@@ -426,7 +426,6 @@ def main():
 
     log.info(f"Objetivo: reservar cochera para el {fecha_manana_str()}")
     log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
-    esperar_hasta_previa_apertura()
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
@@ -441,7 +440,11 @@ def main():
         page = context.new_page()
 
         try:
+            # Login temprano (~15:56) antes de que el backend de Parkalot
+            # se sature con el pico de usuarios a las 16:00.
             login(page)
+
+            esperar_hasta_previa_apertura()
 
             en_mapa = False
             url_mapa = None
