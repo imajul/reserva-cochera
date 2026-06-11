@@ -85,8 +85,13 @@ def esperar_hasta_previa_apertura():
         time.sleep(espera_seg)
     log.info("Entrando en modo de espera activa...")
 
+_screenshot_counter = 0
+
 def screenshot(page, nombre: str):
-    path = f"{nombre}.png"
+    global _screenshot_counter
+    _screenshot_counter += 1
+    ts = ahora_arg().strftime("%H%M%S")
+    path = f"{_screenshot_counter:03d}_{nombre}_{ts}.png"
     try:
         page.screenshot(path=path, full_page=True)
         log.info(f"📸 Screenshot: {path}")
@@ -94,28 +99,68 @@ def screenshot(page, nombre: str):
         log.warning(f"No se pudo guardar screenshot {path}: {e}")
 
 
+LOGIN_REINTENTOS   = 3
+LOGIN_PAUSA_SEG    = 5
+
 def login(page):
     log.info("Navegando a Parkalot...")
     page.goto(PARKALOT_URL, wait_until="networkidle")
     page.wait_for_timeout(2000)
     screenshot(page, "01_login_form")
 
-    log.info("Iniciando sesión...")
-    page.locator(
-        "input[type='email'], input[name='email'], "
-        "input[placeholder*='mail' i], input[formcontrolname='email']"
-    ).first.fill(EMAIL)
-    page.locator(
-        "input[type='password'], input[formcontrolname='password']"
-    ).first.fill(PASSWORD)
-    page.locator(
-        "button:has-text('LOG IN'), button:has-text('Log in'), "
-        "button:has-text('Login'), button:has-text('Ingresar'), button[type='submit']"
-    ).first.click()
-    page.wait_for_load_state("networkidle")
-    page.wait_for_timeout(2000)
-    screenshot(page, "02_post_login")
-    log.info("Sesión iniciada ✓")
+    for intento in range(1, LOGIN_REINTENTOS + 1):
+        if intento > 1:
+            log.info(f"Reintentando login (intento {intento}/{LOGIN_REINTENTOS})...")
+            page.goto(PARKALOT_URL, wait_until="networkidle")
+            page.wait_for_timeout(1000)
+
+        log.info("Iniciando sesión...")
+        page.locator(
+            "input[type='email'], input[name='email'], "
+            "input[placeholder*='mail' i], input[formcontrolname='email']"
+        ).first.fill(EMAIL)
+        page.locator(
+            "input[type='password'], input[formcontrolname='password']"
+        ).first.fill(PASSWORD)
+        page.locator(
+            "button:has-text('LOG IN'), button:has-text('Log in'), "
+            "button:has-text('Login'), button:has-text('Ingresar'), button[type='submit']"
+        ).first.click()
+        page.wait_for_load_state("networkidle")
+        page.wait_for_timeout(2000)
+        screenshot(page, f"0{intento + 1}_post_login")
+
+        # Verificar que el login fue exitoso: el formulario debe desaparecer
+        email_locator = page.locator(
+            "input[type='email'], input[name='email'], "
+            "input[placeholder*='mail' i], input[formcontrolname='email']"
+        ).first
+        try:
+            email_locator.wait_for(state="hidden", timeout=3000)
+            log.info("Sesión iniciada ✓")
+            return
+        except PlaywrightTimeoutError:
+            # El formulario sigue visible — puede ser error transitorio del servidor
+            error_texto = ""
+            try:
+                error_texto = page.locator(
+                    "[class*='error' i], [class*='alert' i], [role='alert']"
+                ).first.inner_text(timeout=1000).strip()
+            except Exception:
+                pass
+            log.warning(
+                f"Login intento {intento}/{LOGIN_REINTENTOS} falló"
+                + (f": {error_texto}" if error_texto else " (formulario sigue visible)")
+            )
+            screenshot(page, f"0{intento + 1}_login_error")
+            if intento < LOGIN_REINTENTOS:
+                log.info(f"Esperando {LOGIN_PAUSA_SEG}s antes de reintentar...")
+                time.sleep(LOGIN_PAUSA_SEG)
+
+    raise RuntimeError(
+        f"Login falló tras {LOGIN_REINTENTOS} intentos. "
+        "Verificar credenciales o estado de Parkalot."
+    )
 
 
 def _ordinal_en(n: int) -> str:
@@ -267,6 +312,11 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             cocheras_a_intentar.append(c)
     log.info(f"Orden de intentos: {cocheras_a_intentar}")
 
+    # Parkalot muestra todos los botones en gris (deshabilitados) durante los primeros
+    # segundos después de las 16:00 mientras procesa la apertura de la ventana de reservas.
+    # Esta flag evita descartar cocheras disponibles durante esa transición.
+    sistema_abierto = False
+
     for cochera_num in cocheras_a_intentar:
         elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
@@ -310,16 +360,20 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            habilitado = False
-            for _ in range(2):
-                page.wait_for_timeout(300)
-                if reserve_btn.is_enabled():
-                    habilitado = True
-                    break
-            if not habilitado:
+            if not sistema_abierto:
+                # Puede ser el estado gris de transición: esperar hasta 8s
+                log.info(f"Cochera {cochera_num}: RESERVE deshabilitado — esperando apertura del sistema (hasta 8s)...")
+                for _ in range(16):
+                    page.wait_for_timeout(500)
+                    if reserve_btn.is_enabled():
+                        break
+            sistema_abierto = True
+            if not reserve_btn.is_enabled():
                 log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
                 screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
                 continue
+        else:
+            sistema_abierto = True
 
         log.info(f"Cochera {cochera_num} disponible — reservando...")
         screenshot(page, f"{prefix}_pre_reserve_{cochera_num}")
@@ -372,7 +426,6 @@ def main():
 
     log.info(f"Objetivo: reservar cochera para el {fecha_manana_str()}")
     log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
-    esperar_hasta_previa_apertura()
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
@@ -387,7 +440,11 @@ def main():
         page = context.new_page()
 
         try:
+            # Login temprano (~15:56) antes de que el backend de Parkalot
+            # se sature con el pico de usuarios a las 16:00.
             login(page)
+
+            esperar_hasta_previa_apertura()
 
             en_mapa = False
             url_mapa = None

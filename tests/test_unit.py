@@ -5,7 +5,7 @@ All Playwright and time-dependent behaviour is fully mocked.
 
 import re
 from datetime import datetime, date, timedelta
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 import pytz
@@ -112,3 +112,82 @@ class TestEsperarHastaPreApertura:
                 mock_time.sleep.assert_called_once()
                 segundos = mock_time.sleep.call_args[0][0]
                 assert abs(segundos - 57590) < 2
+
+
+# ─── enviar_whatsapp ──────────────────────────────────────────────────────────
+
+class TestEnviarWhatsapp:
+    def test_skip_cuando_no_hay_credenciales(self):
+        with patch.object(rc, "WHATSAPP_PHONE", ""), \
+             patch.object(rc, "WHATSAPP_APIKEY", ""), \
+             patch("reservar_cochera.urllib.request.urlopen") as mock_urlopen:
+            rc.enviar_whatsapp("test")
+            mock_urlopen.assert_not_called()
+
+    def test_llama_urlopen_cuando_hay_credenciales(self):
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = MagicMock(return_value=False)
+        with patch.object(rc, "WHATSAPP_PHONE", "5491100000000"), \
+             patch.object(rc, "WHATSAPP_APIKEY", "test-key"), \
+             patch("reservar_cochera.urllib.request.urlopen", return_value=mock_resp) as mock_urlopen:
+            rc.enviar_whatsapp("reserva ok")
+            mock_urlopen.assert_called_once()
+            url_llamado = mock_urlopen.call_args[0][0]
+            assert "5491100000000" in url_llamado
+            assert "test-key" in url_llamado
+
+    def test_no_propaga_excepcion_en_error_de_red(self):
+        with patch.object(rc, "WHATSAPP_PHONE", "5491100000000"), \
+             patch.object(rc, "WHATSAPP_APIKEY", "test-key"), \
+             patch("reservar_cochera.urllib.request.urlopen", side_effect=OSError("timeout")):
+            rc.enviar_whatsapp("mensaje")  # no debe lanzar
+
+
+# ─── _ordinal_en ──────────────────────────────────────────────────────────────
+
+class TestOrdinalEn:
+    @pytest.mark.parametrize("n,esperado", [
+        (1,  "1ST"),
+        (2,  "2ND"),
+        (3,  "3RD"),
+        (4,  "4TH"),
+        (11, "11TH"),  # excepción th para 11
+        (12, "12TH"),  # excepción th para 12
+        (13, "13TH"),  # excepción th para 13
+        (21, "21ST"),  # vuelve a st
+        (22, "22ND"),
+        (23, "23RD"),
+    ])
+    def test_sufijo_correcto(self, n, esperado):
+        assert rc._ordinal_en(n) == esperado
+
+
+# ─── screenshot ───────────────────────────────────────────────────────────────
+
+class TestScreenshot:
+    def test_llama_page_screenshot(self):
+        mock_page = MagicMock()
+        rc.screenshot(mock_page, "test_nombre")
+        mock_page.screenshot.assert_called_once()
+        _, kwargs = mock_page.screenshot.call_args
+        assert "test_nombre" in kwargs["path"]
+        assert kwargs["path"].endswith(".png")
+        assert kwargs["full_page"] is True
+
+    def test_path_incluye_contador_y_timestamp(self):
+        mock_page = MagicMock()
+        before = rc._screenshot_counter
+        rc.screenshot(mock_page, "mi_paso")
+        _, kwargs = mock_page.screenshot.call_args
+        path = kwargs["path"]
+        # formato: NNN_mi_paso_HHMMSS.png
+        import re
+        assert re.match(r"^\d{3}_mi_paso_\d{6}\.png$", path), f"path inesperado: {path}"
+        assert rc._screenshot_counter == before + 1
+
+    def test_no_propaga_excepcion_si_screenshot_falla(self):
+        mock_page = MagicMock()
+        mock_page.screenshot.side_effect = Exception("pantalla no disponible")
+        rc.screenshot(mock_page, "test_fail")  # no debe lanzar
