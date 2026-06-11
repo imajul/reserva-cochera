@@ -99,40 +99,68 @@ def screenshot(page, nombre: str):
         log.warning(f"No se pudo guardar screenshot {path}: {e}")
 
 
+LOGIN_REINTENTOS   = 3
+LOGIN_PAUSA_SEG    = 5
+
 def login(page):
     log.info("Navegando a Parkalot...")
     page.goto(PARKALOT_URL, wait_until="networkidle")
     page.wait_for_timeout(2000)
     screenshot(page, "01_login_form")
 
-    log.info("Iniciando sesión...")
-    page.locator(
-        "input[type='email'], input[name='email'], "
-        "input[placeholder*='mail' i], input[formcontrolname='email']"
-    ).first.fill(EMAIL)
-    page.locator(
-        "input[type='password'], input[formcontrolname='password']"
-    ).first.fill(PASSWORD)
-    page.locator(
-        "button:has-text('LOG IN'), button:has-text('Log in'), "
-        "button:has-text('Login'), button:has-text('Ingresar'), button[type='submit']"
-    ).first.click()
-    page.wait_for_load_state("networkidle")
-    page.wait_for_timeout(2000)
-    screenshot(page, "02_post_login")
+    for intento in range(1, LOGIN_REINTENTOS + 1):
+        if intento > 1:
+            log.info(f"Reintentando login (intento {intento}/{LOGIN_REINTENTOS})...")
+            page.goto(PARKALOT_URL, wait_until="networkidle")
+            page.wait_for_timeout(1000)
 
-    # Verificar que el login fue exitoso: el formulario debe desaparecer
-    try:
+        log.info("Iniciando sesión...")
         page.locator(
             "input[type='email'], input[name='email'], "
             "input[placeholder*='mail' i], input[formcontrolname='email']"
-        ).first.wait_for(state="hidden", timeout=3000)
-    except PlaywrightTimeoutError:
-        raise RuntimeError(
-            "Login falló: el formulario de email sigue visible. "
-            "Verificar credenciales PARKALOT_EMAIL / PARKALOT_PASSWORD."
-        )
-    log.info("Sesión iniciada ✓")
+        ).first.fill(EMAIL)
+        page.locator(
+            "input[type='password'], input[formcontrolname='password']"
+        ).first.fill(PASSWORD)
+        page.locator(
+            "button:has-text('LOG IN'), button:has-text('Log in'), "
+            "button:has-text('Login'), button:has-text('Ingresar'), button[type='submit']"
+        ).first.click()
+        page.wait_for_load_state("networkidle")
+        page.wait_for_timeout(2000)
+        screenshot(page, f"0{intento + 1}_post_login")
+
+        # Verificar que el login fue exitoso: el formulario debe desaparecer
+        email_locator = page.locator(
+            "input[type='email'], input[name='email'], "
+            "input[placeholder*='mail' i], input[formcontrolname='email']"
+        ).first
+        try:
+            email_locator.wait_for(state="hidden", timeout=3000)
+            log.info("Sesión iniciada ✓")
+            return
+        except PlaywrightTimeoutError:
+            # El formulario sigue visible — puede ser error transitorio del servidor
+            error_texto = ""
+            try:
+                error_texto = page.locator(
+                    "[class*='error' i], [class*='alert' i], [role='alert']"
+                ).first.inner_text(timeout=1000).strip()
+            except Exception:
+                pass
+            log.warning(
+                f"Login intento {intento}/{LOGIN_REINTENTOS} falló"
+                + (f": {error_texto}" if error_texto else " (formulario sigue visible)")
+            )
+            screenshot(page, f"0{intento + 1}_login_error")
+            if intento < LOGIN_REINTENTOS:
+                log.info(f"Esperando {LOGIN_PAUSA_SEG}s antes de reintentar...")
+                time.sleep(LOGIN_PAUSA_SEG)
+
+    raise RuntimeError(
+        f"Login falló tras {LOGIN_REINTENTOS} intentos. "
+        "Verificar credenciales o estado de Parkalot."
+    )
 
 
 def _ordinal_en(n: int) -> str:
