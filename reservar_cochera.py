@@ -306,18 +306,55 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     log.info(f"Cocheras en lista: {sorted(cocheras_disponibles.keys())}")
 
+    cocheras_prioridad_set = set(COCHERAS_PRIORIDAD)
     cocheras_a_intentar = [c for c in COCHERAS_PRIORIDAD if c in cocheras_disponibles]
-    for c in sorted(cocheras_disponibles.keys()):
-        if c not in cocheras_a_intentar:
-            cocheras_a_intentar.append(c)
-    log.info(f"Orden de intentos: {cocheras_a_intentar}")
+    cocheras_fallback = [c for c in sorted(cocheras_disponibles.keys()) if c not in cocheras_prioridad_set]
+    log.info(f"Orden de intentos — prioridad: {cocheras_a_intentar}  fallback: {cocheras_fallback}")
 
-    # Parkalot muestra todos los botones en gris (deshabilitados) durante los primeros
-    # segundos después de las 16:00 mientras procesa la apertura de la ventana de reservas.
-    # Esta flag evita descartar cocheras disponibles durante esa transición.
-    sistema_abierto = False
+    # Parkalot mantiene todos los botones RESERVE deshabilitados durante los primeros
+    # ~20 segundos tras las 16:00 mientras el backend abre la ventana de reservas.
+    # Estrategia: durante esa ventana sólo intentamos cocheras prioritarias y esperamos
+    # el tiempo que falte para completar los 20s; recién después pasamos a fallbacks.
+    VENTANA_TRANSICION_SEG = 20
 
-    for cochera_num in cocheras_a_intentar:
+    def _segundos_desde_apertura() -> float:
+        apertura = ahora_arg().replace(
+            hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
+        )
+        return max(0.0, (ahora_arg() - apertura).total_seconds())
+
+    def _esperar_hasta_fin_transicion(cochera_num):
+        """Espera activa hasta que hayan pasado VENTANA_TRANSICION_SEG desde las 16:00."""
+        restantes = VENTANA_TRANSICION_SEG - _segundos_desde_apertura()
+        if restantes <= 0:
+            return
+        log.info(
+            f"Cochera {cochera_num}: RESERVE deshabilitado — en ventana de transición, "
+            f"esperando hasta {VENTANA_TRANSICION_SEG}s desde apertura ({restantes:.1f}s restantes)..."
+        )
+        deadline = ahora_arg().replace(
+            hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
+        ) + timedelta(seconds=VENTANA_TRANSICION_SEG)
+        while ahora_arg() < deadline:
+            page.wait_for_timeout(300)
+            if reserve_btn.is_enabled():
+                break
+
+    for cochera_num in cocheras_a_intentar + cocheras_fallback:
+        es_prioridad = cochera_num in cocheras_prioridad_set
+
+        # Fallbacks sólo se intentan cuando ya pasó la ventana de transición.
+        if not es_prioridad and _segundos_desde_apertura() < VENTANA_TRANSICION_SEG:
+            restantes = VENTANA_TRANSICION_SEG - _segundos_desde_apertura()
+            log.info(
+                f"Cochera {cochera_num} (fallback): omitida — ventana de transición activa "
+                f"({restantes:.1f}s restantes). Sólo se intentan prioritarias ahora."
+            )
+            continue
+
+        if cochera_num not in cocheras_disponibles:
+            continue
+
         elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
 
@@ -360,20 +397,13 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            if not sistema_abierto:
-                # Puede ser el estado gris de transición: esperar hasta 8s
-                log.info(f"Cochera {cochera_num}: RESERVE deshabilitado — esperando apertura del sistema (hasta 8s)...")
-                for _ in range(16):
-                    page.wait_for_timeout(500)
-                    if reserve_btn.is_enabled():
-                        break
-            sistema_abierto = True
+            if es_prioridad and _segundos_desde_apertura() < VENTANA_TRANSICION_SEG:
+                # Dentro de la ventana de transición: esperar activamente en cocheras prioritarias.
+                _esperar_hasta_fin_transicion(cochera_num)
             if not reserve_btn.is_enabled():
                 log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
                 screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
                 continue
-        else:
-            sistema_abierto = True
 
         log.info(f"Cochera {cochera_num} disponible — reservando...")
         screenshot(page, f"{prefix}_pre_reserve_{cochera_num}")
