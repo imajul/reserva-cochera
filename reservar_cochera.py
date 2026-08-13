@@ -172,26 +172,36 @@ def _ordinal_en(n: int) -> str:
 
 
 def _corregir_fecha_si_necesario(page, prefix: str):
+    """Garantiza que la página muestra el mapa de MAÑANA, nunca el de hoy.
+
+    El script siempre reserva para el día siguiente. Si el usuario liberó su
+    cochera hoy, Parkalot puede mostrar un DETAILS para hoy que, de clickearse,
+    llevaría al mapa de hoy. Esta función detecta y corrige ese caso.
+    """
     hoy    = ahora_arg().date()
     manana = hoy + timedelta(days=1)
     hoy_iso    = hoy.isoformat()
     manana_iso = manana.isoformat()
 
+    # ── 1. Verificación por URL (más confiable) ───────────────────────────────
     url = page.url
     if manana_iso in url:
         log.info(f"Fecha correcta en URL: {manana_iso} ✓")
         return
     if hoy_iso in url:
         nueva_url = url.replace(hoy_iso, manana_iso)
-        log.info(f"URL muestra hoy — navegando a {manana_iso}...")
+        log.info(f"URL muestra hoy ({hoy_iso}) — corrigiendo a {manana_iso}...")
         page.goto(nueva_url, wait_until="domcontentloaded")
         page.wait_for_timeout(300)
-        screenshot(page, f"{prefix}_fecha_corregida")
+        screenshot(page, f"{prefix}_fecha_corregida_url")
         log.info("Fecha corregida por URL ✓")
         return
 
-    hoy_mes     = hoy.strftime("%B").upper()
-    hoy_ordinal = _ordinal_en(hoy.day)
+    # ── 2. Verificación por texto de la página ────────────────────────────────
+    hoy_ordinal    = _ordinal_en(hoy.day)
+    manana_ordinal = _ordinal_en(manana.day)
+    hoy_mes        = hoy.strftime("%B").upper()
+    manana_mes     = manana.strftime("%B").upper()
 
     try:
         textos = page.locator(
@@ -199,17 +209,19 @@ def _corregir_fecha_si_necesario(page, prefix: str):
             "[class*='title' i], [class*='header' i], [class*='date' i], "
             "[class*='Typography']"
         ).all_inner_texts()
+        textos_upper = [t.upper() for t in textos]
 
+        muestra_manana = any(
+            manana_ordinal in t and manana_mes in t for t in textos_upper
+        )
         muestra_hoy = any(
-            hoy_ordinal in t.upper() and hoy_mes in t.upper()
-            for t in textos
+            hoy_ordinal in t and hoy_mes in t for t in textos_upper
         )
 
-        if not muestra_hoy:
-            log.info("Fecha en página parece correcta ✓")
+        if muestra_manana:
+            log.info(f"Fecha correcta en página: {manana_ordinal} {manana_mes} ✓")
             return
 
-        log.info(f"Página muestra hoy ({hoy_ordinal} {hoy_mes}) — avanzando al día siguiente...")
         selectores_next = [
             "[data-testid='ChevronRightIcon']",
             "[data-testid='NavigateNextIcon']",
@@ -218,6 +230,20 @@ def _corregir_fecha_si_necesario(page, prefix: str):
             "button[aria-label*='siguiente' i]",
             "button[aria-label*='forward' i]",
         ]
+
+        if muestra_hoy:
+            log.warning(
+                f"Página muestra HOY ({hoy_ordinal} {hoy_mes}) en lugar de mañana "
+                f"({manana_ordinal} {manana_mes}) — avanzando..."
+            )
+        else:
+            # No se detectó ninguna fecha conocida; avanzar igual por precaución.
+            log.warning(
+                f"No se pudo confirmar fecha en página. "
+                f"Esperado: {manana_ordinal} {manana_mes}. Intentando avanzar al día siguiente..."
+            )
+
+        screenshot(page, f"{prefix}_fecha_incorrecta")
         for sel in selectores_next:
             try:
                 btn = page.locator(sel).first
@@ -230,7 +256,7 @@ def _corregir_fecha_si_necesario(page, prefix: str):
             except Exception:
                 continue
 
-        log.warning("No se pudo avanzar al día siguiente — continuando igual.")
+        log.warning("No se encontró botón 'siguiente' — la fecha puede ser incorrecta.")
     except Exception as e:
         log.warning(f"No se pudo verificar fecha en página: {e}")
 
