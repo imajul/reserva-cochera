@@ -172,26 +172,36 @@ def _ordinal_en(n: int) -> str:
 
 
 def _corregir_fecha_si_necesario(page, prefix: str):
+    """Garantiza que la página muestra el mapa de MAÑANA, nunca el de hoy.
+
+    El script siempre reserva para el día siguiente. Si el usuario liberó su
+    cochera hoy, Parkalot puede mostrar un DETAILS para hoy que, de clickearse,
+    llevaría al mapa de hoy. Esta función detecta y corrige ese caso.
+    """
     hoy    = ahora_arg().date()
     manana = hoy + timedelta(days=1)
     hoy_iso    = hoy.isoformat()
     manana_iso = manana.isoformat()
 
+    # ── 1. Verificación por URL (más confiable) ───────────────────────────────
     url = page.url
     if manana_iso in url:
         log.info(f"Fecha correcta en URL: {manana_iso} ✓")
         return
     if hoy_iso in url:
         nueva_url = url.replace(hoy_iso, manana_iso)
-        log.info(f"URL muestra hoy — navegando a {manana_iso}...")
+        log.info(f"URL muestra hoy ({hoy_iso}) — corrigiendo a {manana_iso}...")
         page.goto(nueva_url, wait_until="domcontentloaded")
         page.wait_for_timeout(300)
-        screenshot(page, f"{prefix}_fecha_corregida")
+        screenshot(page, f"{prefix}_fecha_corregida_url")
         log.info("Fecha corregida por URL ✓")
         return
 
-    hoy_mes     = hoy.strftime("%B").upper()
-    hoy_ordinal = _ordinal_en(hoy.day)
+    # ── 2. Verificación por texto de la página ────────────────────────────────
+    hoy_ordinal    = _ordinal_en(hoy.day)
+    manana_ordinal = _ordinal_en(manana.day)
+    hoy_mes        = hoy.strftime("%B").upper()
+    manana_mes     = manana.strftime("%B").upper()
 
     try:
         textos = page.locator(
@@ -199,17 +209,19 @@ def _corregir_fecha_si_necesario(page, prefix: str):
             "[class*='title' i], [class*='header' i], [class*='date' i], "
             "[class*='Typography']"
         ).all_inner_texts()
+        textos_upper = [t.upper() for t in textos]
 
+        muestra_manana = any(
+            manana_ordinal in t and manana_mes in t for t in textos_upper
+        )
         muestra_hoy = any(
-            hoy_ordinal in t.upper() and hoy_mes in t.upper()
-            for t in textos
+            hoy_ordinal in t and hoy_mes in t for t in textos_upper
         )
 
-        if not muestra_hoy:
-            log.info("Fecha en página parece correcta ✓")
+        if muestra_manana:
+            log.info(f"Fecha correcta en página: {manana_ordinal} {manana_mes} ✓")
             return
 
-        log.info(f"Página muestra hoy ({hoy_ordinal} {hoy_mes}) — avanzando al día siguiente...")
         selectores_next = [
             "[data-testid='ChevronRightIcon']",
             "[data-testid='NavigateNextIcon']",
@@ -218,6 +230,20 @@ def _corregir_fecha_si_necesario(page, prefix: str):
             "button[aria-label*='siguiente' i]",
             "button[aria-label*='forward' i]",
         ]
+
+        if muestra_hoy:
+            log.warning(
+                f"Página muestra HOY ({hoy_ordinal} {hoy_mes}) en lugar de mañana "
+                f"({manana_ordinal} {manana_mes}) — avanzando..."
+            )
+        else:
+            # No se detectó ninguna fecha conocida; avanzar igual por precaución.
+            log.warning(
+                f"No se pudo confirmar fecha en página. "
+                f"Esperado: {manana_ordinal} {manana_mes}. Intentando avanzar al día siguiente..."
+            )
+
+        screenshot(page, f"{prefix}_fecha_incorrecta")
         for sel in selectores_next:
             try:
                 btn = page.locator(sel).first
@@ -230,7 +256,7 @@ def _corregir_fecha_si_necesario(page, prefix: str):
             except Exception:
                 continue
 
-        log.warning("No se pudo avanzar al día siguiente — continuando igual.")
+        log.warning("No se encontró botón 'siguiente' — la fecha puede ser incorrecta.")
     except Exception as e:
         log.warning(f"No se pudo verificar fecha en página: {e}")
 
@@ -312,10 +338,22 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             cocheras_a_intentar.append(c)
     log.info(f"Orden de intentos: {cocheras_a_intentar}")
 
-    # Parkalot muestra todos los botones en gris (deshabilitados) durante los primeros
-    # segundos después de las 16:00 mientras procesa la apertura de la ventana de reservas.
-    # Esta flag evita descartar cocheras disponibles durante esa transición.
-    sistema_abierto = False
+    def _reubicar_cochera(num: int):
+        """Busca cochera por número en el DOM actual (con scroll si hace falta)."""
+        for scroll_iter in range(10):
+            items = page.locator("button.MuiButtonBase-root:has(h6)").all()
+            for item in items:
+                try:
+                    box = item.bounding_box()
+                    if box and box["width"] >= 150 and int(item.locator("h6").inner_text().strip()) == num:
+                        return item
+                except Exception:
+                    continue
+            if not items:
+                break
+            items[-1].scroll_into_view_if_needed()
+            page.wait_for_timeout(200)
+        return None
 
     for cochera_num in cocheras_a_intentar:
         elemento = cocheras_disponibles[cochera_num]
@@ -360,20 +398,42 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
             continue
 
         if not reserve_btn.is_enabled():
-            if not sistema_abierto:
-                # Puede ser el estado gris de transición: esperar hasta 8s
-                log.info(f"Cochera {cochera_num}: RESERVE deshabilitado — esperando apertura del sistema (hasta 8s)...")
-                for _ in range(16):
-                    page.wait_for_timeout(500)
-                    if reserve_btn.is_enabled():
-                        break
-            sistema_abierto = True
+            # Parkalot puede mostrar el botón deshabilitado transitoriamente al abrirse
+            # la ventana de reservas. Un refresh rápido fuerza el estado real sin esperar.
+            log.info(f"Cochera {cochera_num}: RESERVE deshabilitado — intentando refresh rápido...")
+            screenshot(page, f"{prefix}_cochera_{cochera_num}_disabled_pre_refresh")
+
+            page.reload(wait_until="domcontentloaded")
+            page.wait_for_timeout(500)
+            screenshot(page, f"{prefix}_cochera_{cochera_num}_post_reload")
+
+            elemento_post = _reubicar_cochera(cochera_num)
+            if elemento_post is None:
+                log.warning(f"Cochera {cochera_num}: no hallada tras refresh — saltando")
+                screenshot(page, f"{prefix}_cochera_{cochera_num}_no_hallada_post_refresh")
+                continue
+
+            try:
+                elemento_post.scroll_into_view_if_needed()
+                elemento_post.click()
+            except Exception:
+                log.warning(f"Cochera {cochera_num}: click falló tras refresh — saltando")
+                continue
+            page.wait_for_timeout(300)
+            screenshot(page, f"{prefix}_cochera_{cochera_num}_sel_post_refresh")
+
+            reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
+            try:
+                reserve_btn.wait_for(timeout=3000)
+            except PlaywrightTimeoutError:
+                log.warning(f"Cochera {cochera_num}: botón RESERVE no encontrado tras refresh — saltando")
+                screenshot(page, f"{prefix}_cochera_{cochera_num}_sin_reserve_post_refresh")
+                continue
+
             if not reserve_btn.is_enabled():
-                log.warning(f"Cochera {cochera_num}: ya reservada (RESERVE deshabilitado). Siguiente...")
+                log.warning(f"Cochera {cochera_num}: RESERVE sigue deshabilitado tras refresh — ya reservada. Siguiente...")
                 screenshot(page, f"{prefix}_cochera_{cochera_num}_ocupada")
                 continue
-        else:
-            sistema_abierto = True
 
         log.info(f"Cochera {cochera_num} disponible — reservando...")
         screenshot(page, f"{prefix}_pre_reserve_{cochera_num}")
