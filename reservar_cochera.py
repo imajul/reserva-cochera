@@ -283,7 +283,7 @@ def click_details_del_dia(page, intento: int = 0) -> bool:
         return False
 
 
-def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
+def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list = None) -> bool:
     prefix = f"intento_{intento:02d}"
     log.info("Obteniendo cocheras disponibles en la lista...")
     page.wait_for_timeout(300)
@@ -332,10 +332,16 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0) -> bool:
 
     log.info(f"Cocheras en lista: {sorted(cocheras_disponibles.keys())}")
 
-    cocheras_a_intentar = [c for c in COCHERAS_PRIORIDAD if c in cocheras_disponibles]
-    for c in sorted(cocheras_disponibles.keys()):
-        if c not in cocheras_a_intentar:
-            cocheras_a_intentar.append(c)
+    if solo_cocheras is not None:
+        cocheras_a_intentar = [c for c in solo_cocheras if c in cocheras_disponibles]
+        if not cocheras_a_intentar:
+            log.warning(f"Cocheras objetivo {solo_cocheras} no encontradas en la lista visible.")
+            return False
+    else:
+        cocheras_a_intentar = [c for c in COCHERAS_PRIORIDAD if c in cocheras_disponibles]
+        for c in sorted(cocheras_disponibles.keys()):
+            if c not in cocheras_a_intentar:
+                cocheras_a_intentar.append(c)
     log.info(f"Orden de intentos: {cocheras_a_intentar}")
 
     def _reubicar_cochera(num: int):
@@ -624,50 +630,109 @@ def main():
                 except Exception as e:
                     log.warning(f"Fase pre-armada falló inesperadamente: {e}")
 
-            # ── Loop general (fallback o primer intento si no hubo pre-armado) ─
+            # ── Loop por prioridad + fallback ────────────────────────────────
+            # Cada cochera prioritaria recibe su propia ventana de tiempo.
+            # Sólo se pasa a la siguiente cuando la anterior está CONFIRMADA
+            # ocupada (sistema abierto + RESERVE deshabilitado). Los fallbacks
+            # sólo se intentan cuando todas las prioritarias fueron descartadas.
             en_mapa = url_mapa is not None
-            limite = ahora_arg() + timedelta(minutes=TIMEOUT_ESPERA_MIN)
+            apertura_dt = ahora_arg().replace(
+                hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
+            )
+            TIMEOUT_POR_PRIORIDAD_SEG = 90   # tiempo máximo por cochera prioritaria
+            TIMEOUT_FALLBACK_MIN       = 5    # tiempo para fallbacks tras agotar prioridades
 
-            while not reservado and ahora_arg() <= limite:
-                intentos += 1
-                log.info(f"[Intento #{intentos} — {ahora_arg().strftime('%H:%M:%S')} ARG]")
+            def _navegar_al_mapa():
+                nonlocal en_mapa, url_mapa
+                if en_mapa and url_mapa:
+                    page.goto(url_mapa, wait_until="domcontentloaded")
+                    page.wait_for_timeout(300)
+                else:
+                    page.goto(PARKALOT_URL, wait_until="networkidle")
+                    page.wait_for_timeout(300)
+                    if not click_details_del_dia(page, intentos):
+                        return False
+                    en_mapa = True
+                    url_mapa = page.url
+                return True
 
-                try:
-                    if en_mapa and url_mapa:
-                        log.info("Recargando mapa de cocheras...")
-                        page.goto(url_mapa, wait_until="domcontentloaded")
-                        page.wait_for_timeout(300)
-                        screenshot(page, f"intento_{intentos:02d}_reload")
-                    else:
-                        page.goto(PARKALOT_URL, wait_until="networkidle")
-                        page.wait_for_timeout(300)
-                        screenshot(page, f"intento_{intentos:02d}_home")
-
-                        if not click_details_del_dia(page, intentos):
-                            log.info(f"Reintentando en {INTERVALO_REINTENTO_SEG}s...")
-                            time.sleep(INTERVALO_REINTENTO_SEG)
-                            continue
-
-                        en_mapa = True
-                        url_mapa = page.url
-
-                    reservado = seleccionar_y_reservar_cochera(page, intentos)
-                except Exception as e:
-                    log.warning(f"Error en intento #{intentos}: {e}")
-                    screenshot(page, f"intento_{intentos:02d}_error")
-                    en_mapa = False
-                    url_mapa = None
-
+            # — Fase 1: intentos insistentes por cochera prioritaria —
+            for cochera_objetivo in COCHERAS_PRIORIDAD:
                 if reservado:
                     break
 
-                ahora_actual = ahora_arg()
-                apertura = ahora_actual.replace(
-                    hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
+                deadline_prioridad = apertura_dt + timedelta(seconds=TIMEOUT_POR_PRIORIDAD_SEG)
+                # Si ya pasó el deadline (arrancamos tarde), dar al menos 15s
+                if ahora_arg() > deadline_prioridad:
+                    deadline_prioridad = ahora_arg() + timedelta(seconds=15)
+
+                log.info(
+                    f"{'=' * 50}\n"
+                    f"  Fase insistente: cochera {cochera_objetivo}\n"
+                    f"  Intentando hasta {deadline_prioridad.strftime('%H:%M:%S')} ARG\n"
+                    f"{'=' * 50}"
                 )
-                intervalo = 1 if ahora_actual >= apertura else INTERVALO_REINTENTO_SEG
-                log.info(f"Reintentando en {intervalo}s...")
-                time.sleep(intervalo)
+                intentos_esta_cochera = 0
+
+                while not reservado and ahora_arg() <= deadline_prioridad:
+                    intentos += 1
+                    intentos_esta_cochera += 1
+                    log.info(
+                        f"[Cochera {cochera_objetivo} — intento #{intentos_esta_cochera} "
+                        f"— {ahora_arg().strftime('%H:%M:%S')} ARG]"
+                    )
+                    try:
+                        screenshot(page, f"intento_{intentos:03d}_c{cochera_objetivo}")
+                        if not _navegar_al_mapa():
+                            log.info("Mapa no disponible aún — reintentando en 5s...")
+                            time.sleep(INTERVALO_REINTENTO_SEG)
+                            continue
+                        reservado = seleccionar_y_reservar_cochera(
+                            page, intentos, solo_cocheras=[cochera_objetivo]
+                        )
+                    except Exception as e:
+                        log.warning(f"Error en intento cochera {cochera_objetivo}: {e}")
+                        screenshot(page, f"intento_{intentos:03d}_error")
+                        en_mapa = False
+                        url_mapa = None
+
+                    if not reservado:
+                        time.sleep(1)
+
+                if not reservado:
+                    secs = max(0, (ahora_arg() - apertura_dt).total_seconds())
+                    if secs < 10:
+                        motivo = "sistema aún no abrió durante el período de intentos"
+                    else:
+                        motivo = f"cochera tomada por otro usuario (sistema abierto hace {secs:.0f}s)"
+                    log.warning(
+                        f"⚠️  Cochera {cochera_objetivo}: descartada tras "
+                        f"{intentos_esta_cochera} intentos. Motivo: {motivo}."
+                    )
+
+            # — Fase 2: fallback con cualquier cochera disponible —
+            if not reservado:
+                log.warning(
+                    "⚠️  Todas las cocheras prioritarias descartadas. "
+                    "Intentando cualquier cochera disponible..."
+                )
+                limite_fallback = ahora_arg() + timedelta(minutes=TIMEOUT_FALLBACK_MIN)
+                while not reservado and ahora_arg() <= limite_fallback:
+                    intentos += 1
+                    log.info(f"[Fallback #{intentos} — {ahora_arg().strftime('%H:%M:%S')} ARG]")
+                    try:
+                        screenshot(page, f"intento_{intentos:03d}_fallback")
+                        if not _navegar_al_mapa():
+                            time.sleep(INTERVALO_REINTENTO_SEG)
+                            continue
+                        reservado = seleccionar_y_reservar_cochera(page, intentos)
+                    except Exception as e:
+                        log.warning(f"Error en fallback #{intentos}: {e}")
+                        screenshot(page, f"intento_{intentos:03d}_error")
+                        en_mapa = False
+                        url_mapa = None
+                    if not reservado:
+                        time.sleep(1)
 
             if not reservado:
                 log.error(f"❌ No se pudo reservar luego de {intentos} intentos.")
