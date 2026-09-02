@@ -15,6 +15,7 @@ import os
 import sys
 import time
 import logging
+import threading
 import urllib.request
 import urllib.parse
 from datetime import datetime, timedelta
@@ -200,8 +201,18 @@ def _corregir_fecha_si_necesario(page, prefix: str):
     # ── 2. Verificación por texto de la página ────────────────────────────────
     hoy_ordinal    = _ordinal_en(hoy.day)
     manana_ordinal = _ordinal_en(manana.day)
-    hoy_mes        = hoy.strftime("%B").upper()
-    manana_mes     = manana.strftime("%B").upper()
+    # Accept both full name ("SEPTEMBER") and 3-letter abbreviation ("SEP")
+    hoy_mes_full   = hoy.strftime("%B").upper()
+    manana_mes_full = manana.strftime("%B").upper()
+    hoy_mes_abr    = hoy_mes_full[:3]
+    manana_mes_abr = manana_mes_full[:3]
+    hoy_mes        = hoy_mes_full
+    manana_mes     = manana_mes_full
+
+    def _contiene_fecha(textos_upper, ordinal, mes_full, mes_abr):
+        return any(
+            ordinal in t and (mes_full in t or mes_abr in t) for t in textos_upper
+        )
 
     try:
         textos = page.locator(
@@ -211,12 +222,8 @@ def _corregir_fecha_si_necesario(page, prefix: str):
         ).all_inner_texts()
         textos_upper = [t.upper() for t in textos]
 
-        muestra_manana = any(
-            manana_ordinal in t and manana_mes in t for t in textos_upper
-        )
-        muestra_hoy = any(
-            hoy_ordinal in t and hoy_mes in t for t in textos_upper
-        )
+        muestra_manana = _contiene_fecha(textos_upper, manana_ordinal, manana_mes_full, manana_mes_abr)
+        muestra_hoy    = _contiene_fecha(textos_upper, hoy_ordinal, hoy_mes_full, hoy_mes_abr)
 
         if muestra_manana:
             log.info(f"Fecha correcta en página: {manana_ordinal} {manana_mes} ✓")
@@ -478,6 +485,185 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list =
     return False
 
 
+def _buscar_y_clickear_cochera(page, cochera_num: int) -> bool:
+    """Scroll through the sidebar list, click cochera_num, return True if found."""
+    for _ in range(10):
+        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
+        for item in items:
+            try:
+                box = item.bounding_box()
+                if box and box["width"] >= 150 and int(item.locator("h6").inner_text().strip()) == cochera_num:
+                    item.scroll_into_view_if_needed()
+                    item.click()
+                    page.wait_for_timeout(300)
+                    return True
+            except Exception:
+                continue
+        if not items:
+            break
+        items[-1].scroll_into_view_if_needed()
+        page.wait_for_timeout(150)
+    log.warning(f"Cochera {cochera_num} no encontrada en lista visible")
+    return False
+
+
+def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> None:
+    """Corre una sesión completa de Playwright para reservar cochera_num.
+
+    Si lo logra, escribe resultado["reservado"]=True y resultado["cochera"]=cochera_num
+    bajo el lock. Si otra sesión ya ganó, aborta sin intentar reservar.
+    """
+    prefix = f"c{cochera_num}"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage"]
+        )
+        context = browser.new_context(
+            viewport={"width": 1440, "height": 900},
+            locale="es-AR",
+            timezone_id="America/Argentina/Buenos_Aires"
+        )
+        page = context.new_page()
+        try:
+            login(page)
+
+            url_mapa = None
+            armada = False
+
+            log.info(f"[{prefix}] Pre-armando cochera {cochera_num}...")
+            try:
+                if click_details_del_dia(page, 0):
+                    url_mapa = page.url
+                    screenshot(page, f"{prefix}_pre_arm_mapa")
+                    armada = _buscar_y_clickear_cochera(page, cochera_num)
+                    if armada:
+                        screenshot(page, f"{prefix}_pre_arm_seleccionada")
+                    else:
+                        log.warning(f"[{prefix}] Cochera {cochera_num} no encontrada en lista")
+            except Exception as e:
+                log.warning(f"[{prefix}] Pre-armado falló: {e}")
+
+            esperar_hasta_previa_apertura()
+
+            if not armada:
+                log.info(f"[{prefix}] Reintentando pre-armado antes de apertura...")
+                try:
+                    if url_mapa:
+                        page.goto(url_mapa, wait_until="domcontentloaded")
+                        page.wait_for_timeout(300)
+                    else:
+                        page.goto(PARKALOT_URL, wait_until="networkidle")
+                        page.wait_for_timeout(300)
+                        if click_details_del_dia(page, 0):
+                            url_mapa = page.url
+                    armada = _buscar_y_clickear_cochera(page, cochera_num)
+                    if armada:
+                        screenshot(page, f"{prefix}_pre_arm_segunda_vez")
+                except Exception as e:
+                    log.warning(f"[{prefix}] Reintento pre-apertura falló: {e}")
+
+            # Esperar exactamente 16:00:00
+            apertura_dt = ahora_arg().replace(
+                hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
+            )
+            while ahora_arg() < apertura_dt:
+                time.sleep(0.05)
+
+            VENTANA_SEG = 10
+            deadline = apertura_dt + timedelta(seconds=VENTANA_SEG)
+            refreshed = False
+            intentos = 0
+
+            log.info(f"[{prefix}] 16:00:00 ARG — vigilando cochera {cochera_num} por {VENTANA_SEG}s")
+            screenshot(page, f"{prefix}_apertura_inicio")
+
+            while ahora_arg() <= deadline:
+                with lock:
+                    if resultado.get("reservado"):
+                        log.info(f"[{prefix}] Otra sesión ya reservó — abortando")
+                        return
+
+                intentos += 1
+                try:
+                    reserve_btn = page.locator(
+                        "button.MuiLoadingButton-root:has-text('Reserve')"
+                    ).first
+                    try:
+                        reserve_btn.wait_for(timeout=100)
+                    except PlaywrightTimeoutError:
+                        elapsed = (ahora_arg() - apertura_dt).total_seconds()
+                        log.warning(
+                            f"[{prefix}] RESERVE no visible a los {elapsed:.1f}s "
+                            f"— cochera {cochera_num} tomada por otro"
+                        )
+                        screenshot(page, f"{prefix}_roja_{intentos:03d}")
+                        return
+
+                    if reserve_btn.is_enabled():
+                        with lock:
+                            if resultado.get("reservado"):
+                                log.info(f"[{prefix}] Otra sesión ganó — abortando click")
+                                return
+                        ts = ahora_arg().strftime('%H:%M:%S.%f')
+                        log.info(f"[{prefix}] ✅ RESERVE habilitado a las {ts}!")
+                        screenshot(page, f"{prefix}_verde_{intentos:03d}")
+                        reserve_btn.click()
+                        log.info(f"[{prefix}] Click en RESERVE ✓")
+                        page.wait_for_timeout(3000)
+                        screenshot(page, f"{prefix}_post_reserve")
+                        try:
+                            confirm = page.locator(
+                                "button:has-text('Confirm'), button:has-text('OK'), "
+                                "button:has-text('Yes'), button:has-text('Aceptar')"
+                            ).first
+                            confirm.wait_for(timeout=3000)
+                            confirm.click()
+                            page.wait_for_timeout(1500)
+                            screenshot(page, f"{prefix}_confirmacion")
+                            log.info(f"[{prefix}] Confirmación aceptada ✓")
+                        except PlaywrightTimeoutError:
+                            pass
+                        screenshot(page, f"{prefix}_resultado")
+                        log.info(f"[{prefix}] ✅ Reserva exitosa — Cochera {cochera_num}")
+                        with lock:
+                            resultado["reservado"] = True
+                            resultado["cochera"] = cochera_num
+                        return
+                    else:
+                        elapsed = (ahora_arg() - apertura_dt).total_seconds()
+                        if elapsed >= 0.5 and not refreshed:
+                            log.info(
+                                f"[{prefix}] 500ms sin apertura — refrescando y reseleccionando..."
+                            )
+                            screenshot(page, f"{prefix}_pre_refresh_{intentos:03d}")
+                            page.reload(wait_until="domcontentloaded")
+                            page.wait_for_timeout(300)
+                            _buscar_y_clickear_cochera(page, cochera_num)
+                            screenshot(page, f"{prefix}_post_refresh_{intentos:03d}")
+                            refreshed = True
+                        time.sleep(0.1)
+                except Exception as e:
+                    log.warning(f"[{prefix}] Error en intento #{intentos}: {e}")
+                    time.sleep(0.1)
+
+            elapsed = (ahora_arg() - apertura_dt).total_seconds()
+            log.warning(
+                f"[{prefix}] ❌ Cochera {cochera_num}: RESERVE nunca se habilitó "
+                f"en {VENTANA_SEG}s — fin de sesión"
+            )
+            screenshot(page, f"{prefix}_timeout")
+
+        except Exception as e:
+            log.exception(f"[{prefix}] Error inesperado: {e}")
+            try:
+                screenshot(page, f"{prefix}_error")
+            except Exception:
+                pass
+        finally:
+            browser.close()
+
+
 def main():
     log.info("=" * 60)
     log.info("  Reserva automática de cochera — Parkalot")
@@ -493,6 +679,46 @@ def main():
     log.info(f"Objetivo: reservar cochera para el {fecha_manana_str()}")
     log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
 
+    # ── Sesiones paralelas: cochera 209 y 208 simultáneamente ───────────────
+    # Cada thread corre su propio browser con login independiente.
+    # La primera que concrete la reserva gana; Parkalot rechaza la segunda
+    # porque la cuenta ya tiene una reserva activa.
+    resultado = {}
+    lock = threading.Lock()
+
+    COCHERAS_PARALELAS = [209, 208]
+    log.info(f"Lanzando {len(COCHERAS_PARALELAS)} sesiones paralelas: {COCHERAS_PARALELAS}")
+
+    threads = [
+        threading.Thread(
+            target=_sesion_cochera,
+            args=(num, resultado, lock),
+            name=f"sesion_c{num}",
+            daemon=True,
+        )
+        for num in COCHERAS_PARALELAS
+    ]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    reservado = resultado.get("reservado", False)
+    cochera_ganadora = resultado.get("cochera")
+
+    if reservado:
+        log.info(f"✅ Cochera {cochera_ganadora} reservada para el {fecha_manana_str()}")
+        enviar_whatsapp(
+            f"✅ Cochera {cochera_ganadora} reservada para el {fecha_manana_str()} 🚗"
+        )
+        log.info("Script finalizado correctamente.")
+        return
+
+    # ── Fallback: ninguna sesión paralela reservó ────────────────────────────
+    log.warning("⚠️  Ninguna sesión paralela concretó reserva — iniciando fallback...")
+    TIMEOUT_FALLBACK_MIN = 5
+    intentos = 0
+
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
@@ -504,247 +730,47 @@ def main():
             timezone_id="America/Argentina/Buenos_Aires"
         )
         page = context.new_page()
-
         try:
-            # Login temprano (~15:56) antes de que el backend de Parkalot
-            # se sature con el pico de usuarios a las 16:00.
             login(page)
-
-            # ── Pre-armado ──────────────────────────────────────────────────
-            # Navegar al mapa y pre-seleccionar la cochera prioritaria ANTES
-            # de esperar las 16:00. Al abrirse el sistema, el único paso
-            # pendiente es un click en RESERVE — sin navegación ni scroll.
-            pre_armed = False
-            cochera_prearmada = None
-            reserve_btn_prearmado = None
             url_mapa = None
+            limite_fallback = ahora_arg() + timedelta(minutes=TIMEOUT_FALLBACK_MIN)
 
-            log.info("Intentando pre-armar cochera prioritaria en el mapa...")
-            try:
-                if click_details_del_dia(page, 0):
-                    url_mapa = page.url
-                    screenshot(page, "pre_arm_mapa")
-                    for cochera_num in COCHERAS_PRIORIDAD:
-                        elemento = None
-                        for scroll_iter in range(8):
-                            items = page.locator("button.MuiButtonBase-root:has(h6)").all()
-                            for item in items:
-                                try:
-                                    box = item.bounding_box()
-                                    if box and box["width"] >= 150 and int(item.locator("h6").inner_text().strip()) == cochera_num:
-                                        elemento = item
-                                        break
-                                except Exception:
-                                    continue
-                            if elemento:
-                                break
-                            if items:
-                                items[-1].scroll_into_view_if_needed()
-                                page.wait_for_timeout(150)
-                        if elemento is None:
-                            log.info(f"Pre-armado: cochera {cochera_num} no encontrada en lista")
-                            continue
-                        try:
-                            elemento.scroll_into_view_if_needed()
-                            elemento.click()
-                            page.wait_for_timeout(300)
-                            btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
-                            btn.wait_for(timeout=2000)
-                            reserve_btn_prearmado = btn
-                            cochera_prearmada = cochera_num
-                            pre_armed = True
-                            log.info(f"Pre-armado: cochera {cochera_num} seleccionada, RESERVE visible ✓")
-                            screenshot(page, f"pre_arm_cochera_{cochera_num}")
-                            break
-                        except Exception as e:
-                            log.warning(f"Pre-armado: cochera {cochera_num} — {e}")
-                else:
-                    log.info("Mapa no disponible aún — se intentará en el loop principal.")
-            except Exception as e:
-                log.warning(f"Pre-armado falló: {e}")
-
-            # ── Esperar hasta 15:59:55 ───────────────────────────────────────
-            esperar_hasta_previa_apertura()
-
-            reservado = False
-            intentos = 0
-
-            # ── Fase rápida: polling pre-armado ─────────────────────────────
-            # Si la cochera ya está seleccionada, sólo esperamos que RESERVE
-            # se habilite y clickeamos. Sin navegación ni scroll en el momento
-            # crítico. Polling cada 100ms durante hasta 25 segundos.
-            if pre_armed and reserve_btn_prearmado is not None:
-                apertura_dt = ahora_arg().replace(
-                    hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
-                )
-                while ahora_arg() < apertura_dt:
-                    time.sleep(0.05)
-
-                log.info(
-                    f"16:00:00 ARG — polling RESERVE cochera {cochera_prearmada} "
-                    f"({ahora_arg().strftime('%H:%M:%S.%f')})"
-                )
-                screenshot(page, f"pre_arm_inicio_polling_{cochera_prearmada}")
-
+            while not reservado and ahora_arg() <= limite_fallback:
+                intentos += 1
+                log.info(f"[Fallback #{intentos} — {ahora_arg().strftime('%H:%M:%S')} ARG]")
                 try:
-                    for _ in range(250):  # hasta 25s a 100ms
-                        try:
-                            if reserve_btn_prearmado.is_enabled():
-                                ts = ahora_arg().strftime('%H:%M:%S.%f')
-                                log.info(f"RESERVE habilitado a las {ts} ✓")
-                                screenshot(page, f"pre_arm_reserve_ok_{cochera_prearmada}")
-                                reserve_btn_prearmado.click()
-                                log.info("Click en RESERVE ✓ (pre-armado)")
-                                page.wait_for_timeout(3000)
-                                screenshot(page, f"pre_arm_post_reserve_{cochera_prearmada}")
-                                try:
-                                    confirm = page.locator(
-                                        "button:has-text('Confirm'), button:has-text('OK'), "
-                                        "button:has-text('Yes'), button:has-text('Aceptar')"
-                                    ).first
-                                    confirm.wait_for(timeout=3000)
-                                    confirm.click()
-                                    page.wait_for_timeout(1500)
-                                    screenshot(page, f"pre_arm_confirmacion_{cochera_prearmada}")
-                                    log.info("Confirmación aceptada ✓")
-                                except PlaywrightTimeoutError:
-                                    pass
-                                screenshot(page, "resultado_reserva")
-                                log.info(f"✅ Reserva exitosa — Cochera {cochera_prearmada}")
-                                enviar_whatsapp(
-                                    f"✅ Cochera {cochera_prearmada} reservada para el {fecha_manana_str()} 🚗"
-                                )
-                                reservado = True
-                                break
-                        except Exception as e:
-                            log.warning(f"Error en polling pre-armado: {e}")
-                            break
-                        time.sleep(0.1)
-
-                    if not reservado:
-                        log.warning(
-                            f"Pre-armado: RESERVE no se habilitó en 25s para cochera "
-                            f"{cochera_prearmada} — continuando con loop general."
-                        )
-                        screenshot(page, "pre_arm_timeout")
-                except Exception as e:
-                    log.warning(f"Fase pre-armada falló inesperadamente: {e}")
-
-            # ── Loop por prioridad + fallback ────────────────────────────────
-            # Cada cochera prioritaria recibe su propia ventana de tiempo.
-            # Sólo se pasa a la siguiente cuando la anterior está CONFIRMADA
-            # ocupada (sistema abierto + RESERVE deshabilitado). Los fallbacks
-            # sólo se intentan cuando todas las prioritarias fueron descartadas.
-            en_mapa = url_mapa is not None
-            apertura_dt = ahora_arg().replace(
-                hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
-            )
-            TIMEOUT_POR_PRIORIDAD_SEG = 90   # tiempo máximo por cochera prioritaria
-            TIMEOUT_FALLBACK_MIN       = 5    # tiempo para fallbacks tras agotar prioridades
-
-            def _navegar_al_mapa():
-                nonlocal en_mapa, url_mapa
-                if en_mapa and url_mapa:
-                    page.goto(url_mapa, wait_until="domcontentloaded")
-                    page.wait_for_timeout(300)
-                else:
-                    page.goto(PARKALOT_URL, wait_until="networkidle")
-                    page.wait_for_timeout(300)
-                    if not click_details_del_dia(page, intentos):
-                        return False
-                    en_mapa = True
-                    url_mapa = page.url
-                return True
-
-            # — Fase 1: intentos insistentes por cochera prioritaria —
-            for cochera_objetivo in COCHERAS_PRIORIDAD:
-                if reservado:
-                    break
-
-                deadline_prioridad = apertura_dt + timedelta(seconds=TIMEOUT_POR_PRIORIDAD_SEG)
-                # Si ya pasó el deadline (arrancamos tarde), dar al menos 15s
-                if ahora_arg() > deadline_prioridad:
-                    deadline_prioridad = ahora_arg() + timedelta(seconds=15)
-
-                log.info(
-                    f"{'=' * 50}\n"
-                    f"  Fase insistente: cochera {cochera_objetivo}\n"
-                    f"  Intentando hasta {deadline_prioridad.strftime('%H:%M:%S')} ARG\n"
-                    f"{'=' * 50}"
-                )
-                intentos_esta_cochera = 0
-
-                while not reservado and ahora_arg() <= deadline_prioridad:
-                    intentos += 1
-                    intentos_esta_cochera += 1
-                    log.info(
-                        f"[Cochera {cochera_objetivo} — intento #{intentos_esta_cochera} "
-                        f"— {ahora_arg().strftime('%H:%M:%S')} ARG]"
-                    )
-                    try:
-                        screenshot(page, f"intento_{intentos:03d}_c{cochera_objetivo}")
-                        if not _navegar_al_mapa():
-                            log.info("Mapa no disponible aún — reintentando en 5s...")
-                            time.sleep(INTERVALO_REINTENTO_SEG)
-                            continue
-                        reservado = seleccionar_y_reservar_cochera(
-                            page, intentos, solo_cocheras=[cochera_objetivo]
-                        )
-                    except Exception as e:
-                        log.warning(f"Error en intento cochera {cochera_objetivo}: {e}")
-                        screenshot(page, f"intento_{intentos:03d}_error")
-                        en_mapa = False
-                        url_mapa = None
-
-                    if not reservado:
-                        time.sleep(1)
-
-                if not reservado:
-                    secs = max(0, (ahora_arg() - apertura_dt).total_seconds())
-                    if secs < 10:
-                        motivo = "sistema aún no abrió durante el período de intentos"
+                    screenshot(page, f"fallback_{intentos:03d}")
+                    if url_mapa:
+                        page.goto(url_mapa, wait_until="domcontentloaded")
+                        page.wait_for_timeout(300)
                     else:
-                        motivo = f"cochera tomada por otro usuario (sistema abierto hace {secs:.0f}s)"
-                    log.warning(
-                        f"⚠️  Cochera {cochera_objetivo}: descartada tras "
-                        f"{intentos_esta_cochera} intentos. Motivo: {motivo}."
-                    )
-
-            # — Fase 2: fallback con cualquier cochera disponible —
-            if not reservado:
-                log.warning(
-                    "⚠️  Todas las cocheras prioritarias descartadas. "
-                    "Intentando cualquier cochera disponible..."
-                )
-                limite_fallback = ahora_arg() + timedelta(minutes=TIMEOUT_FALLBACK_MIN)
-                while not reservado and ahora_arg() <= limite_fallback:
-                    intentos += 1
-                    log.info(f"[Fallback #{intentos} — {ahora_arg().strftime('%H:%M:%S')} ARG]")
-                    try:
-                        screenshot(page, f"intento_{intentos:03d}_fallback")
-                        if not _navegar_al_mapa():
+                        page.goto(PARKALOT_URL, wait_until="networkidle")
+                        page.wait_for_timeout(300)
+                        if click_details_del_dia(page, intentos):
+                            url_mapa = page.url
+                        else:
                             time.sleep(INTERVALO_REINTENTO_SEG)
                             continue
-                        reservado = seleccionar_y_reservar_cochera(page, intentos)
-                    except Exception as e:
-                        log.warning(f"Error en fallback #{intentos}: {e}")
-                        screenshot(page, f"intento_{intentos:03d}_error")
-                        en_mapa = False
-                        url_mapa = None
-                    if not reservado:
-                        time.sleep(1)
+                    reservado = seleccionar_y_reservar_cochera(page, intentos)
+                except Exception as e:
+                    log.warning(f"Error en fallback #{intentos}: {e}")
+                    screenshot(page, f"fallback_{intentos:03d}_error")
+                    url_mapa = None
+                if not reservado:
+                    time.sleep(1)
 
             if not reservado:
-                log.error(f"❌ No se pudo reservar luego de {intentos} intentos.")
+                log.error(f"❌ No se pudo reservar luego de {intentos} intentos de fallback.")
                 screenshot(page, "error_reserva")
                 enviar_whatsapp(
                     f"❌ No se pudo reservar cochera para el {fecha_manana_str()}. "
                     f"Revisá el log en GitHub Actions."
                 )
                 sys.exit(1)
-
+            else:
+                log.info("Script finalizado correctamente (vía fallback).")
         except Exception as e:
-            log.exception(f"Error inesperado: {e}")
+            log.exception(f"Error inesperado en fallback: {e}")
             try:
                 screenshot(page, "error_reserva")
             except Exception:
@@ -756,8 +782,6 @@ def main():
             sys.exit(1)
         finally:
             browser.close()
-
-    log.info("Script finalizado correctamente.")
 
 
 if __name__ == "__main__":
