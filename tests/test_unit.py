@@ -182,9 +182,9 @@ class TestScreenshot:
         rc.screenshot(mock_page, "mi_paso")
         _, kwargs = mock_page.screenshot.call_args
         path = kwargs["path"]
-        # formato: NNN_mi_paso_HHMMSS.png
+        # formato: NNN_mi_paso_HHMMSSffffff.png (timestamp con microsegundos truncados a 6 chars)
         import re
-        assert re.match(r"^\d{3}_mi_paso_\d{6}\.png$", path), f"path inesperado: {path}"
+        assert re.match(r"^\d{3}_mi_paso_\d{12}\.png$", path), f"path inesperado: {path}"
         assert rc._screenshot_counter == before + 1
 
     def test_no_propaga_excepcion_si_screenshot_falla(self):
