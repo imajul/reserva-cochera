@@ -272,25 +272,55 @@ def _corregir_fecha_si_necesario(page, prefix: str):
 
 
 def click_details_del_dia(page, intento: int = 0) -> bool:
+    """Clickea el botón DETAILS de la card de MAÑANA. Nunca clickea el de hoy.
+
+    Busca el botón DETAILS cuya card contenga el ordinal de mañana (ej. "4th").
+    Si ese botón aún no existe (las reservas de mañana no abrieron), retorna False.
+    """
     prefix = f"intento_{intento:02d}"
-    log.info("Buscando botones DETAILS...")
+    manana = ahora_arg().date() + timedelta(days=1)
+    manana_ordinal = _ordinal_en(manana.day).lower()   # e.g. "4th"
+
+    log.info(f"Buscando botón DETAILS para mañana ({manana_ordinal} {manana.strftime('%B')})...")
     page.wait_for_timeout(300)
+    screenshot(page, f"{prefix}_antes_details")
+
     try:
         page.wait_for_selector("text=DETAILS", timeout=8000)
-        details_btns = page.get_by_text("DETAILS").all()
-        log.info(f"Botones DETAILS encontrados: {len(details_btns)}")
-        screenshot(page, f"{prefix}_details_encontrado")
-        details_btns[-1].click()
-        page.wait_for_load_state("domcontentloaded")
-        page.wait_for_timeout(500)
-        screenshot(page, f"{prefix}_post_details")
-        log.info("Click en DETAILS ✓")
-        _corregir_fecha_si_necesario(page, prefix)
-        return True
     except PlaywrightTimeoutError:
-        log.warning("No se encontró el botón DETAILS — las reservas aún no están habilitadas.")
+        log.warning("No se encontró ningún botón DETAILS — reservas aún no habilitadas.")
         screenshot(page, f"{prefix}_sin_details")
         return False
+
+    details_btns = page.get_by_text("DETAILS").all()
+    log.info(f"Botones DETAILS visibles: {len(details_btns)}")
+
+    # Buscar el DETAILS cuya card-ancestro contenga el ordinal de mañana
+    for btn in details_btns:
+        try:
+            ancestor = btn.locator(
+                f"xpath=ancestor::*[contains(., '{manana_ordinal}')][1]"
+            )
+            if ancestor.count() > 0:
+                log.info(f"Botón DETAILS de mañana ({manana_ordinal}) encontrado ✓")
+                screenshot(page, f"{prefix}_details_manana_ok")
+                btn.click()
+                page.wait_for_load_state("domcontentloaded")
+                page.wait_for_timeout(500)
+                screenshot(page, f"{prefix}_post_details")
+                log.info("Click en DETAILS de mañana ✓")
+                _corregir_fecha_si_necesario(page, prefix)
+                return True
+        except Exception as e:
+            log.debug(f"Error verificando ancestro DETAILS: {e}")
+            continue
+
+    log.warning(
+        f"Botón DETAILS para mañana ({manana_ordinal}) no disponible aún "
+        f"— reservas de mañana no abiertas todavía."
+    )
+    screenshot(page, f"{prefix}_sin_details_manana")
+    return False
 
 
 def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list = None) -> bool:
