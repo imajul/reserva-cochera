@@ -1,0 +1,4664 @@
+{
+  "fecha": "2026-09-08",
+  "dia_semana": "martes",
+  "hora_inicio_scan": "16:00:00.642",
+  "total_scans": 237,
+  "cocheras": {
+    "74": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "75": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "76": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "77": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "100": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "101": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "102": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "103": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "104": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "112": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "113": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "114": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "115": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "208": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "209": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "212": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "213": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "214": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "235": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "236": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "237": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "238": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "239": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "252": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "253": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "254": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "255": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "256": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "257": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "258": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "276": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "277": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "278": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2037": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2038": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2044": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2045": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2046": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2047": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2048": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2049": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2050": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2051": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2052": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2053": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2054": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2055": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2056": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2057": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2058": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2059": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2060": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "2061": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3114": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3115": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3116": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3117": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3118": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3119": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3173": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3174": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3175": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3176": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3177": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3178": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3179": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3180": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3181": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3182": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    },
+    "3185": {
+      "ultimo_color": "desconocido",
+      "primer_verde_seg": null,
+      "primer_rojo_seg": null
+    }
+  },
+  "timeline": [
+    {
+      "timestamp": "16:00:00.642",
+      "segundos_desde_apertura": 0.64,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido",
+        "115": "desconocido",
+        "208": "desconocido",
+        "209": "desconocido",
+        "212": "desconocido",
+        "213": "desconocido",
+        "214": "desconocido",
+        "235": "desconocido",
+        "236": "desconocido",
+        "237": "desconocido",
+        "238": "desconocido",
+        "239": "desconocido",
+        "252": "desconocido",
+        "253": "desconocido",
+        "254": "desconocido",
+        "255": "desconocido",
+        "256": "desconocido",
+        "257": "desconocido",
+        "258": "desconocido",
+        "276": "desconocido",
+        "277": "desconocido",
+        "278": "desconocido",
+        "2037": "desconocido",
+        "2038": "desconocido",
+        "2044": "desconocido",
+        "2045": "desconocido",
+        "2046": "desconocido",
+        "2047": "desconocido",
+        "2048": "desconocido",
+        "2049": "desconocido",
+        "2050": "desconocido",
+        "2051": "desconocido",
+        "2052": "desconocido",
+        "2053": "desconocido",
+        "2054": "desconocido",
+        "2055": "desconocido",
+        "2056": "desconocido",
+        "2057": "desconocido",
+        "2058": "desconocido",
+        "2059": "desconocido",
+        "2060": "desconocido",
+        "2061": "desconocido",
+        "3114": "desconocido",
+        "3115": "desconocido",
+        "3116": "desconocido",
+        "3117": "desconocido",
+        "3118": "desconocido",
+        "3119": "desconocido",
+        "3173": "desconocido",
+        "3174": "desconocido",
+        "3175": "desconocido",
+        "3176": "desconocido",
+        "3177": "desconocido",
+        "3178": "desconocido",
+        "3179": "desconocido",
+        "3180": "desconocido",
+        "3181": "desconocido",
+        "3182": "desconocido",
+        "3185": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:02.018",
+      "segundos_desde_apertura": 2.02,
+      "cocheras": {
+        "3177": "desconocido",
+        "3178": "desconocido",
+        "3179": "desconocido",
+        "3180": "desconocido",
+        "3181": "desconocido",
+        "3182": "desconocido",
+        "3185": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:02.518",
+      "segundos_desde_apertura": 2.52,
+      "cocheras": {
+        "3177": "desconocido",
+        "3178": "desconocido",
+        "3179": "desconocido",
+        "3180": "desconocido",
+        "3181": "desconocido",
+        "3182": "desconocido",
+        "3185": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:03.018",
+      "segundos_desde_apertura": 3.02,
+      "cocheras": {
+        "3177": "desconocido",
+        "3178": "desconocido",
+        "3179": "desconocido",
+        "3180": "desconocido",
+        "3181": "desconocido",
+        "3182": "desconocido",
+        "3185": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:03.518",
+      "segundos_desde_apertura": 3.52,
+      "cocheras": {
+        "3177": "desconocido",
+        "3178": "desconocido",
+        "3179": "desconocido",
+        "3180": "desconocido",
+        "3181": "desconocido",
+        "3182": "desconocido",
+        "3185": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:04.019",
+      "segundos_desde_apertura": 4.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:04.519",
+      "segundos_desde_apertura": 4.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:05.019",
+      "segundos_desde_apertura": 5.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:05.519",
+      "segundos_desde_apertura": 5.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:06.019",
+      "segundos_desde_apertura": 6.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:06.519",
+      "segundos_desde_apertura": 6.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:07.019",
+      "segundos_desde_apertura": 7.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:07.520",
+      "segundos_desde_apertura": 7.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:08.020",
+      "segundos_desde_apertura": 8.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:08.520",
+      "segundos_desde_apertura": 8.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:09.020",
+      "segundos_desde_apertura": 9.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:09.520",
+      "segundos_desde_apertura": 9.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:10.020",
+      "segundos_desde_apertura": 10.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:10.521",
+      "segundos_desde_apertura": 10.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:11.021",
+      "segundos_desde_apertura": 11.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:11.521",
+      "segundos_desde_apertura": 11.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:12.021",
+      "segundos_desde_apertura": 12.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:12.521",
+      "segundos_desde_apertura": 12.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:13.021",
+      "segundos_desde_apertura": 13.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:13.521",
+      "segundos_desde_apertura": 13.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:14.022",
+      "segundos_desde_apertura": 14.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:14.522",
+      "segundos_desde_apertura": 14.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:15.022",
+      "segundos_desde_apertura": 15.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:15.522",
+      "segundos_desde_apertura": 15.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:16.022",
+      "segundos_desde_apertura": 16.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:16.522",
+      "segundos_desde_apertura": 16.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:17.022",
+      "segundos_desde_apertura": 17.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:17.523",
+      "segundos_desde_apertura": 17.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:18.023",
+      "segundos_desde_apertura": 18.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:18.523",
+      "segundos_desde_apertura": 18.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:19.023",
+      "segundos_desde_apertura": 19.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:19.523",
+      "segundos_desde_apertura": 19.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:20.023",
+      "segundos_desde_apertura": 20.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:20.524",
+      "segundos_desde_apertura": 20.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:21.024",
+      "segundos_desde_apertura": 21.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:21.524",
+      "segundos_desde_apertura": 21.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:22.024",
+      "segundos_desde_apertura": 22.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:22.524",
+      "segundos_desde_apertura": 22.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:23.024",
+      "segundos_desde_apertura": 23.02,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:23.524",
+      "segundos_desde_apertura": 23.52,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:24.025",
+      "segundos_desde_apertura": 24.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:24.525",
+      "segundos_desde_apertura": 24.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:25.025",
+      "segundos_desde_apertura": 25.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:25.525",
+      "segundos_desde_apertura": 25.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:26.025",
+      "segundos_desde_apertura": 26.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:26.525",
+      "segundos_desde_apertura": 26.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:27.026",
+      "segundos_desde_apertura": 27.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:27.526",
+      "segundos_desde_apertura": 27.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:28.026",
+      "segundos_desde_apertura": 28.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:28.526",
+      "segundos_desde_apertura": 28.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:29.026",
+      "segundos_desde_apertura": 29.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:29.527",
+      "segundos_desde_apertura": 29.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:30.027",
+      "segundos_desde_apertura": 30.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:30.527",
+      "segundos_desde_apertura": 30.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:31.027",
+      "segundos_desde_apertura": 31.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:31.527",
+      "segundos_desde_apertura": 31.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:32.027",
+      "segundos_desde_apertura": 32.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:32.527",
+      "segundos_desde_apertura": 32.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:33.028",
+      "segundos_desde_apertura": 33.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:33.528",
+      "segundos_desde_apertura": 33.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:34.028",
+      "segundos_desde_apertura": 34.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:34.528",
+      "segundos_desde_apertura": 34.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:35.028",
+      "segundos_desde_apertura": 35.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:35.528",
+      "segundos_desde_apertura": 35.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:36.029",
+      "segundos_desde_apertura": 36.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:36.529",
+      "segundos_desde_apertura": 36.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:37.029",
+      "segundos_desde_apertura": 37.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:37.529",
+      "segundos_desde_apertura": 37.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:38.029",
+      "segundos_desde_apertura": 38.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:38.529",
+      "segundos_desde_apertura": 38.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:39.030",
+      "segundos_desde_apertura": 39.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:39.530",
+      "segundos_desde_apertura": 39.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:40.030",
+      "segundos_desde_apertura": 40.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:40.530",
+      "segundos_desde_apertura": 40.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:41.030",
+      "segundos_desde_apertura": 41.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:41.530",
+      "segundos_desde_apertura": 41.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:42.030",
+      "segundos_desde_apertura": 42.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:42.531",
+      "segundos_desde_apertura": 42.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:43.031",
+      "segundos_desde_apertura": 43.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:43.531",
+      "segundos_desde_apertura": 43.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:44.031",
+      "segundos_desde_apertura": 44.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:44.531",
+      "segundos_desde_apertura": 44.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:45.031",
+      "segundos_desde_apertura": 45.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:45.531",
+      "segundos_desde_apertura": 45.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:46.031",
+      "segundos_desde_apertura": 46.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:46.532",
+      "segundos_desde_apertura": 46.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:47.032",
+      "segundos_desde_apertura": 47.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:47.532",
+      "segundos_desde_apertura": 47.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:48.032",
+      "segundos_desde_apertura": 48.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:48.532",
+      "segundos_desde_apertura": 48.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:49.032",
+      "segundos_desde_apertura": 49.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:49.532",
+      "segundos_desde_apertura": 49.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:50.033",
+      "segundos_desde_apertura": 50.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:50.533",
+      "segundos_desde_apertura": 50.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:51.033",
+      "segundos_desde_apertura": 51.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:51.533",
+      "segundos_desde_apertura": 51.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:52.033",
+      "segundos_desde_apertura": 52.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:52.533",
+      "segundos_desde_apertura": 52.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:53.033",
+      "segundos_desde_apertura": 53.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:53.534",
+      "segundos_desde_apertura": 53.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:54.034",
+      "segundos_desde_apertura": 54.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:54.534",
+      "segundos_desde_apertura": 54.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:55.034",
+      "segundos_desde_apertura": 55.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:55.534",
+      "segundos_desde_apertura": 55.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:56.034",
+      "segundos_desde_apertura": 56.03,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:56.534",
+      "segundos_desde_apertura": 56.53,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:57.035",
+      "segundos_desde_apertura": 57.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:57.535",
+      "segundos_desde_apertura": 57.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:58.035",
+      "segundos_desde_apertura": 58.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:58.535",
+      "segundos_desde_apertura": 58.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:59.035",
+      "segundos_desde_apertura": 59.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:00:59.535",
+      "segundos_desde_apertura": 59.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:00.035",
+      "segundos_desde_apertura": 60.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:00.536",
+      "segundos_desde_apertura": 60.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:01.036",
+      "segundos_desde_apertura": 61.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:01.536",
+      "segundos_desde_apertura": 61.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:02.036",
+      "segundos_desde_apertura": 62.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:02.536",
+      "segundos_desde_apertura": 62.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:03.036",
+      "segundos_desde_apertura": 63.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:03.537",
+      "segundos_desde_apertura": 63.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:04.037",
+      "segundos_desde_apertura": 64.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:04.537",
+      "segundos_desde_apertura": 64.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:05.037",
+      "segundos_desde_apertura": 65.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:05.537",
+      "segundos_desde_apertura": 65.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:06.037",
+      "segundos_desde_apertura": 66.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:06.537",
+      "segundos_desde_apertura": 66.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:07.038",
+      "segundos_desde_apertura": 67.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:07.538",
+      "segundos_desde_apertura": 67.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:08.038",
+      "segundos_desde_apertura": 68.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:08.538",
+      "segundos_desde_apertura": 68.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:09.038",
+      "segundos_desde_apertura": 69.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:09.539",
+      "segundos_desde_apertura": 69.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:10.039",
+      "segundos_desde_apertura": 70.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:10.539",
+      "segundos_desde_apertura": 70.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:11.039",
+      "segundos_desde_apertura": 71.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:11.539",
+      "segundos_desde_apertura": 71.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:12.039",
+      "segundos_desde_apertura": 72.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:12.539",
+      "segundos_desde_apertura": 72.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:13.040",
+      "segundos_desde_apertura": 73.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:13.540",
+      "segundos_desde_apertura": 73.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:14.040",
+      "segundos_desde_apertura": 74.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:14.540",
+      "segundos_desde_apertura": 74.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:15.040",
+      "segundos_desde_apertura": 75.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:15.540",
+      "segundos_desde_apertura": 75.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:16.041",
+      "segundos_desde_apertura": 76.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:16.541",
+      "segundos_desde_apertura": 76.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:17.041",
+      "segundos_desde_apertura": 77.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:17.541",
+      "segundos_desde_apertura": 77.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:18.041",
+      "segundos_desde_apertura": 78.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:18.541",
+      "segundos_desde_apertura": 78.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:19.041",
+      "segundos_desde_apertura": 79.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:19.542",
+      "segundos_desde_apertura": 79.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:20.042",
+      "segundos_desde_apertura": 80.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:20.542",
+      "segundos_desde_apertura": 80.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:21.042",
+      "segundos_desde_apertura": 81.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:21.542",
+      "segundos_desde_apertura": 81.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:22.042",
+      "segundos_desde_apertura": 82.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:22.543",
+      "segundos_desde_apertura": 82.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:23.043",
+      "segundos_desde_apertura": 83.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:23.543",
+      "segundos_desde_apertura": 83.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:24.043",
+      "segundos_desde_apertura": 84.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:24.543",
+      "segundos_desde_apertura": 84.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:25.043",
+      "segundos_desde_apertura": 85.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:25.544",
+      "segundos_desde_apertura": 85.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:26.044",
+      "segundos_desde_apertura": 86.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:26.544",
+      "segundos_desde_apertura": 86.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:27.044",
+      "segundos_desde_apertura": 87.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:27.544",
+      "segundos_desde_apertura": 87.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:28.044",
+      "segundos_desde_apertura": 88.04,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:28.544",
+      "segundos_desde_apertura": 88.54,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:29.045",
+      "segundos_desde_apertura": 89.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:29.545",
+      "segundos_desde_apertura": 89.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:30.045",
+      "segundos_desde_apertura": 90.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:30.545",
+      "segundos_desde_apertura": 90.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:31.045",
+      "segundos_desde_apertura": 91.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:31.545",
+      "segundos_desde_apertura": 91.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:32.045",
+      "segundos_desde_apertura": 92.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:32.546",
+      "segundos_desde_apertura": 92.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:33.046",
+      "segundos_desde_apertura": 93.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:33.546",
+      "segundos_desde_apertura": 93.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:34.046",
+      "segundos_desde_apertura": 94.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:34.546",
+      "segundos_desde_apertura": 94.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:35.046",
+      "segundos_desde_apertura": 95.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:35.546",
+      "segundos_desde_apertura": 95.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:36.046",
+      "segundos_desde_apertura": 96.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:36.547",
+      "segundos_desde_apertura": 96.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:37.047",
+      "segundos_desde_apertura": 97.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:37.547",
+      "segundos_desde_apertura": 97.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:38.047",
+      "segundos_desde_apertura": 98.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:38.547",
+      "segundos_desde_apertura": 98.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:39.047",
+      "segundos_desde_apertura": 99.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:39.548",
+      "segundos_desde_apertura": 99.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:40.048",
+      "segundos_desde_apertura": 100.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:40.548",
+      "segundos_desde_apertura": 100.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:41.048",
+      "segundos_desde_apertura": 101.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:41.548",
+      "segundos_desde_apertura": 101.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:42.048",
+      "segundos_desde_apertura": 102.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:42.548",
+      "segundos_desde_apertura": 102.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:43.049",
+      "segundos_desde_apertura": 103.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:43.549",
+      "segundos_desde_apertura": 103.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:44.049",
+      "segundos_desde_apertura": 104.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:44.549",
+      "segundos_desde_apertura": 104.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:45.049",
+      "segundos_desde_apertura": 105.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:45.549",
+      "segundos_desde_apertura": 105.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:46.049",
+      "segundos_desde_apertura": 106.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:46.550",
+      "segundos_desde_apertura": 106.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:47.050",
+      "segundos_desde_apertura": 107.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:47.550",
+      "segundos_desde_apertura": 107.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:48.050",
+      "segundos_desde_apertura": 108.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:48.550",
+      "segundos_desde_apertura": 108.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:49.050",
+      "segundos_desde_apertura": 109.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:49.551",
+      "segundos_desde_apertura": 109.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:50.051",
+      "segundos_desde_apertura": 110.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:50.551",
+      "segundos_desde_apertura": 110.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:51.051",
+      "segundos_desde_apertura": 111.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:51.551",
+      "segundos_desde_apertura": 111.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:52.051",
+      "segundos_desde_apertura": 112.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:52.552",
+      "segundos_desde_apertura": 112.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:53.052",
+      "segundos_desde_apertura": 113.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:53.552",
+      "segundos_desde_apertura": 113.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:54.052",
+      "segundos_desde_apertura": 114.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:54.552",
+      "segundos_desde_apertura": 114.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:55.052",
+      "segundos_desde_apertura": 115.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:55.552",
+      "segundos_desde_apertura": 115.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:56.053",
+      "segundos_desde_apertura": 116.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:56.553",
+      "segundos_desde_apertura": 116.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:57.053",
+      "segundos_desde_apertura": 117.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:57.553",
+      "segundos_desde_apertura": 117.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:58.053",
+      "segundos_desde_apertura": 118.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:58.553",
+      "segundos_desde_apertura": 118.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:59.054",
+      "segundos_desde_apertura": 119.05,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    },
+    {
+      "timestamp": "16:01:59.554",
+      "segundos_desde_apertura": 119.55,
+      "cocheras": {
+        "74": "desconocido",
+        "75": "desconocido",
+        "76": "desconocido",
+        "77": "desconocido",
+        "100": "desconocido",
+        "101": "desconocido",
+        "102": "desconocido",
+        "103": "desconocido",
+        "104": "desconocido",
+        "112": "desconocido",
+        "113": "desconocido",
+        "114": "desconocido"
+      }
+    }
+  ]
+}
