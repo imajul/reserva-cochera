@@ -22,8 +22,8 @@ Parkalot habilita las reservas del día siguiente a las **16:00 ARG** en punto. 
 
 | Sesión | Cochera | Ubicación |
 |--------|---------|-----------|
-| 1° (paralela) | **209** | 2do Subsuelo — Olivos |
-| 2° (paralela) | **208** | 2do Subsuelo — Olivos |
+| 1° (paralela) | **255** | — |
+| 2° (paralela) | **254** | — |
 | Fallback | **237** y cualquier disponible | — |
 
 **Días de ejecución:**
@@ -212,14 +212,14 @@ Repetí el Paso 4 para generar uno nuevo y actualizalo en cron-job.org.
 
 Editá esta línea en `reservar_cochera.py`:
 ```python
-COCHERAS_PRIORIDAD = [209, 208, 237]  # De mayor a menor preferencia
+COCHERAS_PRIORIDAD = [255, 254, 237]  # De mayor a menor preferencia
 ```
 
 ### Cambiar qué cocheras se intentan en paralelo
 
 Editá esta línea en `main()` dentro de `reservar_cochera.py`:
 ```python
-COCHERAS_PARALELAS = [209, 208]  # Estas dos se intentan al mismo tiempo a las 16:00
+COCHERAS_PARALELAS = [255, 254]  # Estas dos se intentan al mismo tiempo a las 16:00
 ```
 
 ### Cambiar los días de ejecución
