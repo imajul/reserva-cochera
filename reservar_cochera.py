@@ -712,7 +712,7 @@ def main():
     log.info(f"Objetivo: reservar cochera para el {fecha_manana_str()}")
     log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
 
-    # ── Sesiones paralelas: cochera 209 y 208 simultáneamente ───────────────
+    # ── Sesiones paralelas: cochera 255 y 254 simultáneamente ───────────────
     # Cada thread corre su propio browser con login independiente.
     # La primera que concrete la reserva gana; Parkalot rechaza la segunda
     # porque la cuenta ya tiene una reserva activa.
