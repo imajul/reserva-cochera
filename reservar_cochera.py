@@ -626,12 +626,12 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
                         reserve_btn.wait_for(timeout=100)
                     except PlaywrightTimeoutError:
                         elapsed = (ahora_arg() - apertura_dt).total_seconds()
-                        log.warning(
+                        log.info(
                             f"[{prefix}] RESERVE no visible a los {elapsed:.1f}s "
-                            f"— cochera {cochera_num} tomada por otro"
+                            f"— cochera en negro, siguiendo..."
                         )
-                        screenshot(page, f"{prefix}_roja_{intentos:03d}")
-                        return
+                        time.sleep(0.1)
+                        continue
 
                     if reserve_btn.is_enabled():
                         with lock:
