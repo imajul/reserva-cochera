@@ -603,7 +603,7 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
             while ahora_arg() < apertura_dt:
                 time.sleep(0.05)
 
-            VENTANA_SEG = 10
+            VENTANA_SEG = 20
             deadline = apertura_dt + timedelta(seconds=VENTANA_SEG)
             refreshed = False
             intentos = 0
