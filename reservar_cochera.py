@@ -540,11 +540,146 @@ def _buscar_y_clickear_cochera(page, cochera_num: int) -> bool:
     return False
 
 
-def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> None:
-    """Corre una sesión completa de Playwright para reservar cochera_num.
+_COLOR_JS = """
+(el) => {
+    function parseRGB(s) {
+        const m = (s || '').match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+        return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : null;
+    }
+    function classifyRGB(rgb) {
+        if (!rgb) return null;
+        const [r, g, b] = rgb;
+        if (r > 150 && r > g * 1.5 && r > b * 1.5) return 'rojo';
+        if (g > 120 && g > r * 1.2 && g > b * 0.9) return 'verde';
+        return null;
+    }
+    const signals = [];
+    const collectColors = (node) => {
+        const cs = window.getComputedStyle(node);
+        signals.push(cs.backgroundColor, cs.borderLeftColor, cs.borderBottomColor,
+                     cs.color, cs.borderColor, cs.outlineColor);
+    };
+    collectColors(el);
+    el.querySelectorAll('*').forEach(c => collectColors(c));
+    for (const s of signals) {
+        const c = classifyRGB(parseRGB(s));
+        if (c === 'rojo' || c === 'verde') return c;
+    }
+    return 'negro';
+}
+"""
 
-    Si lo logra, escribe resultado["reservado"]=True y resultado["cochera"]=cochera_num
-    bajo el lock. Si otra sesión ya ganó, aborta sin intentar reservar.
+
+def _color_sidebar(page, cochera_num: int) -> str:
+    """Detecta el color del item de cochera en la lista lateral sin clickearlo."""
+    try:
+        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
+        for item in items:
+            try:
+                box = item.bounding_box()
+                if box and box["width"] >= 150 and int(item.locator("h6").inner_text(timeout=200).strip()) == cochera_num:
+                    return page.evaluate(_COLOR_JS, item)
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return "desconocido"
+
+
+def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: threading.Lock,
+                          apertura_dt, deadline_global) -> bool:
+    """
+    Con la cochera `num` ya seleccionada en el mapa, polling del botón RESERVE.
+
+    - Verde (enabled)  → reserva y retorna True
+    - Negro (disabled) → espera hasta que se habilite o expire deadline_global
+    - Ausente >2s post-apertura → cochera fue tomada (rojo), retorna False
+    """
+    ausente_desde = None
+    refreshed = False
+
+    while ahora_arg() <= deadline_global:
+        with lock:
+            if resultado.get("reservado"):
+                return False
+
+        reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
+        try:
+            reserve_btn.wait_for(timeout=100)
+            ausente_desde = None
+
+            if reserve_btn.is_enabled():
+                with lock:
+                    if resultado.get("reservado"):
+                        return False
+                ts = ahora_arg().strftime('%H:%M:%S.%f')
+                log.info(f"[{prefix}] ✅ RESERVE habilitado a las {ts} — cochera {num}")
+                screenshot(page, f"{prefix}_verde_{num}")
+                reserve_btn.click()
+                log.info(f"[{prefix}] Click RESERVE ✓")
+                page.wait_for_timeout(3000)
+                screenshot(page, f"{prefix}_post_reserve_{num}")
+                try:
+                    confirm = page.locator(
+                        "button:has-text('Confirm'), button:has-text('OK'), "
+                        "button:has-text('Yes'), button:has-text('Aceptar')"
+                    ).first
+                    confirm.wait_for(timeout=3000)
+                    confirm.click()
+                    page.wait_for_timeout(1500)
+                    screenshot(page, f"{prefix}_confirmacion_{num}")
+                    log.info(f"[{prefix}] Confirmación aceptada ✓")
+                except PlaywrightTimeoutError:
+                    pass
+                screenshot(page, f"{prefix}_resultado_{num}")
+                log.info(f"[{prefix}] ✅ Reserva exitosa — Cochera {num}")
+                with lock:
+                    resultado["reservado"] = True
+                    resultado["cochera"] = num
+                return True
+
+            else:
+                # Negro: esperar. Si ya pasó la apertura y llevamos 500ms → refresh
+                elapsed = (ahora_arg() - apertura_dt).total_seconds()
+                if elapsed >= 0.5 and not refreshed:
+                    log.info(f"[{prefix}] 500ms post-apertura sin verde — refrescando...")
+                    screenshot(page, f"{prefix}_pre_refresh_{num}")
+                    page.reload(wait_until="domcontentloaded")
+                    page.wait_for_timeout(300)
+                    _buscar_y_clickear_cochera(page, num)
+                    screenshot(page, f"{prefix}_post_refresh_{num}")
+                    refreshed = True
+                time.sleep(0.1)
+
+        except PlaywrightTimeoutError:
+            # RESERVE no visible
+            now = ahora_arg()
+            if ausente_desde is None:
+                ausente_desde = now
+            ausente_seg = (now - ausente_desde).total_seconds()
+            # Solo interpretar como rojo si ya pasó la apertura y lleva >2s ausente
+            if ausente_seg >= 2 and now >= apertura_dt:
+                log.info(f"[{prefix}] Cochera {num}: RESERVE ausente {ausente_seg:.1f}s post-apertura — tomada por otro")
+                screenshot(page, f"{prefix}_roja_{num}")
+                return False
+            time.sleep(0.1)
+
+    log.warning(f"[{prefix}] Cochera {num}: deadline global expirado")
+    screenshot(page, f"{prefix}_timeout_{num}")
+    return False
+
+
+def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> None:
+    """
+    Flujo por sesión:
+      1. Login
+      2. Click DETAILS en cuanto esté disponible (sin espera fija)
+      3. Para cada cochera en orden de prioridad (empezando por cochera_num):
+         - Rojo en sidebar → saltar
+         - Negro o verde → clickear y monitorear RESERVE:
+             * Verde → reservar inmediatamente
+             * Negro → esperar hasta que se habilite
+             * Ausente >2s post-apertura → cochera tomada, siguiente
     """
     prefix = f"c{cochera_num}"
     with sync_playwright() as p:
@@ -561,131 +696,71 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
         try:
             login(page)
 
+            # ── 1. Click DETAILS en cuanto aparezca ──────────────────────────
             url_mapa = None
-            armada = False
-
-            log.info(f"[{prefix}] Pre-armando cochera {cochera_num}...")
-            try:
-                if click_details_del_dia(page, 0):
+            intento_details = 0
+            while url_mapa is None:
+                with lock:
+                    if resultado.get("reservado"):
+                        return
+                intento_details += 1
+                if click_details_del_dia(page, intento_details):
                     url_mapa = page.url
-                    screenshot(page, f"{prefix}_pre_arm_mapa")
-                    armada = _buscar_y_clickear_cochera(page, cochera_num)
-                    if armada:
-                        screenshot(page, f"{prefix}_pre_arm_seleccionada")
-                    else:
-                        log.warning(f"[{prefix}] Cochera {cochera_num} no encontrada en lista")
-            except Exception as e:
-                log.warning(f"[{prefix}] Pre-armado falló: {e}")
+                    log.info(f"[{prefix}] DETAILS clickeado — dentro del mapa ✓")
+                else:
+                    log.info(f"[{prefix}] DETAILS no disponible aún — reintentando en 3s...")
+                    time.sleep(3)
+                    page.goto(PARKALOT_URL, wait_until="networkidle")
+                    page.wait_for_timeout(1000)
 
-            esperar_hasta_previa_apertura()
-
-            if not armada:
-                log.info(f"[{prefix}] Reintentando pre-armado antes de apertura...")
-                try:
-                    if url_mapa:
-                        page.goto(url_mapa, wait_until="domcontentloaded")
-                        page.wait_for_timeout(300)
-                    else:
-                        page.goto(PARKALOT_URL, wait_until="networkidle")
-                        page.wait_for_timeout(300)
-                        if click_details_del_dia(page, 0):
-                            url_mapa = page.url
-                    armada = _buscar_y_clickear_cochera(page, cochera_num)
-                    if armada:
-                        screenshot(page, f"{prefix}_pre_arm_segunda_vez")
-                except Exception as e:
-                    log.warning(f"[{prefix}] Reintento pre-apertura falló: {e}")
-
-            # Esperar exactamente 16:00:00
+            # Deadline global: apertura + 60s
             apertura_dt = ahora_arg().replace(
                 hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
             )
-            while ahora_arg() < apertura_dt:
-                time.sleep(0.05)
+            deadline_global = apertura_dt + timedelta(seconds=60)
 
-            VENTANA_SEG = 20
-            deadline = apertura_dt + timedelta(seconds=VENTANA_SEG)
-            refreshed = False
-            intentos = 0
+            # ── 2. Iterar cocheras: esta sesión arranca con cochera_num ───────
+            otras = [c for c in COCHERAS_PRIORIDAD if c != cochera_num]
+            cocheras_a_intentar = [cochera_num] + otras
 
-            log.info(f"[{prefix}] 16:00:00 ARG — vigilando cochera {cochera_num} por {VENTANA_SEG}s")
-            screenshot(page, f"{prefix}_apertura_inicio")
-
-            while ahora_arg() <= deadline:
+            for num in cocheras_a_intentar:
                 with lock:
                     if resultado.get("reservado"):
-                        log.info(f"[{prefix}] Otra sesión ya reservó — abortando")
                         return
 
-                intentos += 1
-                try:
-                    reserve_btn = page.locator(
-                        "button.MuiLoadingButton-root:has-text('Reserve')"
-                    ).first
-                    try:
-                        reserve_btn.wait_for(timeout=100)
-                    except PlaywrightTimeoutError:
-                        elapsed = (ahora_arg() - apertura_dt).total_seconds()
-                        log.info(
-                            f"[{prefix}] RESERVE no visible a los {elapsed:.1f}s "
-                            f"— cochera en negro, siguiendo..."
-                        )
-                        time.sleep(0.1)
-                        continue
+                if ahora_arg() > deadline_global:
+                    log.warning(f"[{prefix}] Deadline global expirado — fin de sesión")
+                    break
 
-                    if reserve_btn.is_enabled():
-                        with lock:
-                            if resultado.get("reservado"):
-                                log.info(f"[{prefix}] Otra sesión ganó — abortando click")
-                                return
-                        ts = ahora_arg().strftime('%H:%M:%S.%f')
-                        log.info(f"[{prefix}] ✅ RESERVE habilitado a las {ts}!")
-                        screenshot(page, f"{prefix}_verde_{intentos:03d}")
-                        reserve_btn.click()
-                        log.info(f"[{prefix}] Click en RESERVE ✓")
-                        page.wait_for_timeout(3000)
-                        screenshot(page, f"{prefix}_post_reserve")
-                        try:
-                            confirm = page.locator(
-                                "button:has-text('Confirm'), button:has-text('OK'), "
-                                "button:has-text('Yes'), button:has-text('Aceptar')"
-                            ).first
-                            confirm.wait_for(timeout=3000)
-                            confirm.click()
-                            page.wait_for_timeout(1500)
-                            screenshot(page, f"{prefix}_confirmacion")
-                            log.info(f"[{prefix}] Confirmación aceptada ✓")
-                        except PlaywrightTimeoutError:
-                            pass
-                        screenshot(page, f"{prefix}_resultado")
-                        log.info(f"[{prefix}] ✅ Reserva exitosa — Cochera {cochera_num}")
-                        with lock:
-                            resultado["reservado"] = True
-                            resultado["cochera"] = cochera_num
-                        return
-                    else:
-                        elapsed = (ahora_arg() - apertura_dt).total_seconds()
-                        if elapsed >= 0.5 and not refreshed:
-                            log.info(
-                                f"[{prefix}] 500ms sin apertura — refrescando y reseleccionando..."
-                            )
-                            screenshot(page, f"{prefix}_pre_refresh_{intentos:03d}")
-                            page.reload(wait_until="domcontentloaded")
-                            page.wait_for_timeout(300)
-                            _buscar_y_clickear_cochera(page, cochera_num)
-                            screenshot(page, f"{prefix}_post_refresh_{intentos:03d}")
-                            refreshed = True
-                        time.sleep(0.1)
-                except Exception as e:
-                    log.warning(f"[{prefix}] Error en intento #{intentos}: {e}")
-                    time.sleep(0.1)
+                # ── 2a. Verificar color en sidebar antes de clickear ──────────
+                color = _color_sidebar(page, num)
+                log.info(f"[{prefix}] Cochera {num} — color sidebar: {color}")
 
-            elapsed = (ahora_arg() - apertura_dt).total_seconds()
-            log.warning(
-                f"[{prefix}] ❌ Cochera {cochera_num}: RESERVE nunca se habilitó "
-                f"en {VENTANA_SEG}s — fin de sesión"
-            )
-            screenshot(page, f"{prefix}_timeout")
+                if color == 'rojo':
+                    log.info(f"[{prefix}] Cochera {num} roja — descartando, siguiente...")
+                    continue
+
+                # ── 2b. Clickear cochera (negro o verde) ─────────────────────
+                screenshot(page, f"{prefix}_pre_click_{num}")
+                if not _buscar_y_clickear_cochera(page, num):
+                    log.warning(f"[{prefix}] Cochera {num} no encontrada — siguiente")
+                    continue
+                screenshot(page, f"{prefix}_post_click_{num}")
+
+                # ── 2c. Monitorear RESERVE ────────────────────────────────────
+                reservado = _reservar_en_detalle(
+                    page, num, prefix, resultado, lock, apertura_dt, deadline_global
+                )
+                if reservado:
+                    return
+
+                # Cochera tomada o deadline: volver al mapa e intentar siguiente
+                if url_mapa:
+                    page.goto(url_mapa, wait_until="domcontentloaded")
+                    page.wait_for_timeout(500)
+
+            log.warning(f"[{prefix}] ❌ Todas las cocheras agotadas")
+            screenshot(page, f"{prefix}_sin_resultado")
 
         except Exception as e:
             log.exception(f"[{prefix}] Error inesperado: {e}")
