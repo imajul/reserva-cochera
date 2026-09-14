@@ -652,16 +652,18 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
                 time.sleep(0.1)
 
         except PlaywrightTimeoutError:
-            # RESERVE no visible
+            # RESERVE no visible: antes de apertura es negro normal, después puede ser rojo
             now = ahora_arg()
-            if ausente_desde is None:
-                ausente_desde = now
-            ausente_seg = (now - ausente_desde).total_seconds()
-            # Solo interpretar como rojo si ya pasó la apertura y lleva >2s ausente
-            if ausente_seg >= 2 and now >= apertura_dt:
-                log.info(f"[{prefix}] Cochera {num}: RESERVE ausente {ausente_seg:.1f}s post-apertura — tomada por otro")
-                screenshot(page, f"{prefix}_roja_{num}")
-                return False
+            if now >= apertura_dt:
+                # Solo empezar a contar ausencia POST-apertura
+                if ausente_desde is None:
+                    ausente_desde = now
+                ausente_seg = (now - ausente_desde).total_seconds()
+                if ausente_seg >= 20:
+                    # 20s post-apertura sin RESERVE → cochera tomada por otro
+                    log.info(f"[{prefix}] Cochera {num}: RESERVE ausente {ausente_seg:.1f}s post-apertura — roja, siguiente")
+                    screenshot(page, f"{prefix}_roja_{num}")
+                    return False
             time.sleep(0.1)
 
     log.warning(f"[{prefix}] Cochera {num}: deadline global expirado")
@@ -717,7 +719,7 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
             apertura_dt = ahora_arg().replace(
                 hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0
             )
-            deadline_global = apertura_dt + timedelta(seconds=60)
+            deadline_global = apertura_dt + timedelta(seconds=90)
 
             # ── 2. Iterar cocheras: esta sesión arranca con cochera_num ───────
             otras = [c for c in COCHERAS_PRIORIDAD if c != cochera_num]
