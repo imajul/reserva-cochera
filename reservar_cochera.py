@@ -573,14 +573,19 @@ _COLOR_JS = """
 def _color_sidebar(page, cochera_num: int) -> str:
     """Detecta el color del item de cochera en la lista lateral sin clickearlo."""
     try:
-        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
-        for item in items:
-            try:
-                box = item.bounding_box()
-                if box and box["width"] >= 150 and int(item.locator("h6").inner_text(timeout=200).strip()) == cochera_num:
-                    return page.evaluate(_COLOR_JS, item)
-            except Exception:
-                continue
+        for _ in range(10):
+            items = page.locator("button.MuiButtonBase-root:has(h6)").all()
+            for item in items:
+                try:
+                    box = item.bounding_box()
+                    if box and box["width"] >= 150 and int(item.locator("h6").inner_text(timeout=200).strip()) == cochera_num:
+                        return page.evaluate(_COLOR_JS, item)
+                except Exception:
+                    continue
+            if not items:
+                break
+            items[-1].scroll_into_view_if_needed()
+            page.wait_for_timeout(150)
     except Exception:
         pass
     return "desconocido"
@@ -592,8 +597,8 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
     Con la cochera `num` ya seleccionada en el mapa, polling del botón RESERVE.
 
     - Verde (enabled)  → reserva y retorna True
-    - Negro (disabled) → espera hasta que se habilite o expire deadline_global
-    - Ausente >2s post-apertura → cochera fue tomada (rojo), retorna False
+    - Negro (disabled) → espera; chequea sidebar cada 2s para detectar rojo
+    - Sidebar roja o RESERVE ausente post-apertura → retorna False inmediatamente
     """
     ultimo_screenshot_negro = None
     ultimo_check_sidebar = None
@@ -682,6 +687,7 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
              * Ausente >20s post-apertura → cochera tomada, siguiente
     """
     prefix = f"c{cochera_num}"
+    esperar_hasta_previa_apertura()
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
