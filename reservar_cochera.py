@@ -571,21 +571,17 @@ _COLOR_JS = """
 
 
 def _color_sidebar(page, cochera_num: int) -> str:
-    """Detecta el color del item de cochera en la lista lateral sin clickearlo."""
+    """Detecta el color del item de cochera en la lista lateral sin clickearlo.
+    Solo evalúa los items actualmente visibles — no hace scroll."""
     try:
-        for _ in range(10):
-            items = page.locator("button.MuiButtonBase-root:has(h6)").all()
-            for item in items:
-                try:
-                    box = item.bounding_box()
-                    if box and box["width"] >= 150 and int(item.locator("h6").inner_text(timeout=200).strip()) == cochera_num:
-                        return page.evaluate(_COLOR_JS, item)
-                except Exception:
-                    continue
-            if not items:
-                break
-            items[-1].scroll_into_view_if_needed()
-            page.wait_for_timeout(150)
+        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
+        for item in items:
+            try:
+                box = item.bounding_box()
+                if box and box["width"] >= 150 and int(item.locator("h6").inner_text(timeout=200).strip()) == cochera_num:
+                    return page.evaluate(_COLOR_JS, item)
+            except Exception:
+                continue
     except Exception:
         pass
     return "desconocido"
