@@ -787,14 +787,14 @@ def main():
     log.info(f"Objetivo: reservar cochera para el {fecha_manana_str()}")
     log.info(f"Orden de prioridad: {COCHERAS_PRIORIDAD}")
 
-    # ── Sesiones paralelas: cochera 255 y 254 simultáneamente ───────────────
+    # ── Sesiones paralelas: una por cochera prioritaria ─────────────────────
     # Cada thread corre su propio browser con login independiente.
-    # La primera que concrete la reserva gana; Parkalot rechaza la segunda
+    # La primera que concrete la reserva gana; Parkalot rechaza las demás
     # porque la cuenta ya tiene una reserva activa.
     resultado = {}
     lock = threading.Lock()
 
-    COCHERAS_PARALELAS = [255, 254]
+    COCHERAS_PARALELAS = [255, 254, 256, 257]
     log.info(f"Lanzando {len(COCHERAS_PARALELAS)} sesiones paralelas: {COCHERAS_PARALELAS}")
 
     threads = [
