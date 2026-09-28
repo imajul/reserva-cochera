@@ -596,6 +596,7 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
     - Ausente >2s post-apertura → cochera fue tomada (rojo), retorna False
     """
     ausente_desde = None
+    ultimo_screenshot_negro = None
 
     while ahora_arg() <= deadline_global:
         with lock:
@@ -637,7 +638,12 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
                     resultado["cochera"] = num
                 return True
             else:
-                # Negro: seguir esperando sin reload (el reload pierde la selección de cochera)
+                # Negro: captura cada 1s y seguir esperando
+                now = ahora_arg()
+                if ultimo_screenshot_negro is None or (now - ultimo_screenshot_negro).total_seconds() >= 1:
+                    ts = now.strftime('%H%M%S%f')
+                    screenshot(page, f"{prefix}_negro_{num}_{ts}")
+                    ultimo_screenshot_negro = now
                 time.sleep(0.1)
 
         except PlaywrightTimeoutError:
