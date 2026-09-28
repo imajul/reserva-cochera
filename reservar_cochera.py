@@ -518,15 +518,51 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list =
     return False
 
 
-def _buscar_y_clickear_cochera(page, cochera_num: int) -> bool:
-    """Encuentra la cochera por número en todo el DOM del sidebar y la clickea.
+_SCROLL_CONTAINER_JS = """
+() => {
+    // Encuentra el contenedor scroll de la lista virtual Virtuoso
+    const item = document.querySelector('[data-item-index]');
+    if (!item) return null;
+    let el = item.parentElement;
+    while (el) {
+        const cs = window.getComputedStyle(el);
+        if (cs.overflowY === 'auto' || cs.overflowY === 'scroll' ||
+            cs.overflow === 'auto' || cs.overflow === 'scroll') {
+            return el.scrollHeight;
+        }
+        el = el.parentElement;
+    }
+    return null;
+}
+"""
 
-    Usa selector directo por texto para no depender del scroll actual — el sidebar
-    se auto-scrollea cuando otros usuarios interactúan, pero todos los items
-    están en el DOM. scroll_into_view_if_needed() la trae al viewport antes del click.
+_SCROLL_TO_JS = """
+(pos) => {
+    const item = document.querySelector('[data-item-index]');
+    if (!item) return;
+    let el = item.parentElement;
+    while (el) {
+        const cs = window.getComputedStyle(el);
+        if (cs.overflowY === 'auto' || cs.overflowY === 'scroll' ||
+            cs.overflow === 'auto' || cs.overflow === 'scroll') {
+            el.scrollTop = pos;
+            return;
+        }
+        el = el.parentElement;
+    }
+}
+"""
+
+
+def _buscar_y_clickear_cochera(page, cochera_num: int) -> bool:
+    """Encuentra la cochera por número en la lista virtual del sidebar y la clickea.
+
+    La lista usa Virtuoso (virtual scroll): solo los items visibles están en el DOM.
+    Primero intenta un selector directo; si no está renderizado, scrollea el
+    contenedor virtual en pasos hasta encontrarla.
     """
-    try:
-        btn = page.locator("button.MuiButtonBase-root").filter(
+    def _intentar_click():
+        btn = page.locator("button.MuiCardActionArea-root").filter(
             has=page.locator(f"h6:text-is('{cochera_num}')")
         ).first
         if btn.count() > 0:
@@ -534,9 +570,32 @@ def _buscar_y_clickear_cochera(page, cochera_num: int) -> bool:
             btn.click()
             page.wait_for_timeout(300)
             return True
-    except Exception:
-        pass
-    log.warning(f"Cochera {cochera_num} no encontrada en el DOM del sidebar")
+        return False
+
+    try:
+        # Intento directo (item ya renderizado en el viewport actual)
+        if _intentar_click():
+            return True
+
+        # Item no visible: scrollear el contenedor virtual en pasos de 400px
+        scroll_height = page.evaluate(_SCROLL_CONTAINER_JS)
+        if scroll_height is None:
+            log.warning(f"Cochera {cochera_num}: no se encontró scroll container")
+            return False
+
+        pos = 0
+        step = 400
+        while pos <= scroll_height:
+            page.evaluate(_SCROLL_TO_JS, pos)
+            page.wait_for_timeout(150)
+            if _intentar_click():
+                return True
+            pos += step
+
+    except Exception as e:
+        log.warning(f"Cochera {cochera_num}: error buscando en sidebar — {e}")
+
+    log.warning(f"Cochera {cochera_num} no encontrada en el sidebar")
     return False
 
 
@@ -571,14 +630,13 @@ _COLOR_JS = """
 
 
 def _color_sidebar(page, cochera_num: int) -> str:
-    """Detecta el color del item de cochera en la lista lateral sin clickearlo.
-    Busca el elemento por número en todo el DOM — no depende del scroll actual."""
+    """Detecta el color del item expandido en el sidebar (post-click).
+    El color solo aparece cuando el item está expandido (MuiCollapse-entered)."""
     try:
-        btn = page.locator("button.MuiButtonBase-root").filter(
+        btn = page.locator("button.MuiCardActionArea-root").filter(
             has=page.locator(f"h6:text-is('{cochera_num}')")
         ).first
         if btn.count() > 0:
-            btn.scroll_into_view_if_needed()
             return page.evaluate(_COLOR_JS, btn)
     except Exception:
         pass
@@ -732,15 +790,10 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
                     log.warning(f"[{prefix}] Deadline global expirado — fin de sesión")
                     break
 
-                # ── 2a. Verificar color en sidebar antes de clickear ──────────
-                color = _color_sidebar(page, num)
-                log.info(f"[{prefix}] Cochera {num} — color sidebar: {color}")
-
-                if color == 'rojo':
-                    log.info(f"[{prefix}] Cochera {num} roja — descartando, siguiente...")
-                    continue
-
-                # ── 2b. Clickear cochera (negro o verde) ─────────────────────
+                # ── 2a. Clickear cochera directamente ────────────────────────
+                # El color solo es visible DESPUÉS de expandir el item (click),
+                # por lo que el chequeo pre-click siempre devolvía "desconocido".
+                # El estado real (verde/negro/rojo) se detecta en _reservar_en_detalle.
                 screenshot(page, f"{prefix}_pre_click_{num}")
                 if not _buscar_y_clickear_cochera(page, num):
                     log.warning(f"[{prefix}] Cochera {num} no encontrada — siguiente")
