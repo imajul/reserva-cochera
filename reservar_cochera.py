@@ -519,24 +519,24 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list =
 
 
 def _buscar_y_clickear_cochera(page, cochera_num: int) -> bool:
-    """Scroll through the sidebar list, click cochera_num, return True if found."""
-    for _ in range(10):
-        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
-        for item in items:
-            try:
-                box = item.bounding_box()
-                if box and box["width"] >= 150 and int(item.locator("h6").inner_text().strip()) == cochera_num:
-                    item.scroll_into_view_if_needed()
-                    item.click()
-                    page.wait_for_timeout(300)
-                    return True
-            except Exception:
-                continue
-        if not items:
-            break
-        items[-1].scroll_into_view_if_needed()
-        page.wait_for_timeout(150)
-    log.warning(f"Cochera {cochera_num} no encontrada en lista visible")
+    """Encuentra la cochera por número en todo el DOM del sidebar y la clickea.
+
+    Usa selector directo por texto para no depender del scroll actual — el sidebar
+    se auto-scrollea cuando otros usuarios interactúan, pero todos los items
+    están en el DOM. scroll_into_view_if_needed() la trae al viewport antes del click.
+    """
+    try:
+        btn = page.locator("button.MuiButtonBase-root").filter(
+            has=page.locator(f"h6:text-is('{cochera_num}')")
+        ).first
+        if btn.count() > 0:
+            btn.scroll_into_view_if_needed()
+            btn.click()
+            page.wait_for_timeout(300)
+            return True
+    except Exception:
+        pass
+    log.warning(f"Cochera {cochera_num} no encontrada en el DOM del sidebar")
     return False
 
 
@@ -572,16 +572,14 @@ _COLOR_JS = """
 
 def _color_sidebar(page, cochera_num: int) -> str:
     """Detecta el color del item de cochera en la lista lateral sin clickearlo.
-    Solo evalúa los items actualmente visibles — no hace scroll."""
+    Busca el elemento por número en todo el DOM — no depende del scroll actual."""
     try:
-        items = page.locator("button.MuiButtonBase-root:has(h6)").all()
-        for item in items:
-            try:
-                box = item.bounding_box()
-                if box and box["width"] >= 150 and int(item.locator("h6").inner_text(timeout=200).strip()) == cochera_num:
-                    return page.evaluate(_COLOR_JS, item)
-            except Exception:
-                continue
+        btn = page.locator("button.MuiButtonBase-root").filter(
+            has=page.locator(f"h6:text-is('{cochera_num}')")
+        ).first
+        if btn.count() > 0:
+            btn.scroll_into_view_if_needed()
+            return page.evaluate(_COLOR_JS, btn)
     except Exception:
         pass
     return "desconocido"
