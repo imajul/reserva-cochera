@@ -79,7 +79,7 @@ def fecha_manana_str() -> str:
 def esperar_hasta_previa_apertura():
     ahora = ahora_arg()
     apertura = ahora.replace(hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0)
-    pre_apertura = apertura - timedelta(seconds=10)
+    pre_apertura = apertura - timedelta(seconds=60)
     if ahora < pre_apertura:
         espera_seg = (pre_apertura - ahora).total_seconds()
         log.info(f"Son las {ahora.strftime('%H:%M:%S')} ARG. Esperando hasta las {pre_apertura.strftime('%H:%M:%S')} ({int(espera_seg)}s)...")
