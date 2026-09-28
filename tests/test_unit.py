@@ -103,7 +103,7 @@ class TestEsperarHastaPreApertura:
             with patch("reservar_cochera.time") as mock_time:
                 rc.esperar_hasta_previa_apertura()
                 segundos = mock_time.sleep.call_args[0][0]
-                assert abs(segundos - 3590) < 2
+                assert abs(segundos - 3540) < 2
 
     def test_duerme_desde_madrugada(self):
         with patch("reservar_cochera.ahora_arg", return_value=self._dt(0, 0)):
@@ -111,7 +111,7 @@ class TestEsperarHastaPreApertura:
                 rc.esperar_hasta_previa_apertura()
                 mock_time.sleep.assert_called_once()
                 segundos = mock_time.sleep.call_args[0][0]
-                assert abs(segundos - 57590) < 2
+                assert abs(segundos - 57540) < 2
 
 
 # ─── enviar_whatsapp ──────────────────────────────────────────────────────────

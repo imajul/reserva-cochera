@@ -595,8 +595,8 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
     - Negro (disabled) → espera hasta que se habilite o expire deadline_global
     - Ausente >2s post-apertura → cochera fue tomada (rojo), retorna False
     """
-    ausente_desde = None
     ultimo_screenshot_negro = None
+    ultimo_check_sidebar = None
 
     while ahora_arg() <= deadline_global:
         with lock:
@@ -606,7 +606,6 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
         reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
         try:
             reserve_btn.wait_for(timeout=100)
-            ausente_desde = None
 
             if reserve_btn.is_enabled():
                 with lock:
@@ -638,23 +637,29 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
                     resultado["cochera"] = num
                 return True
             else:
-                # Negro: captura cada 1s y seguir esperando
+                # Negro: captura cada 1s y verificar sidebar cada 2s para detectar rojo
                 now = ahora_arg()
                 if ultimo_screenshot_negro is None or (now - ultimo_screenshot_negro).total_seconds() >= 1:
                     ts = now.strftime('%H%M%S%f')
                     screenshot(page, f"{prefix}_negro_{num}_{ts}")
                     ultimo_screenshot_negro = now
+                if now >= apertura_dt:
+                    if ultimo_check_sidebar is None or (now - ultimo_check_sidebar).total_seconds() >= 2:
+                        color = _color_sidebar(page, num)
+                        ultimo_check_sidebar = now
+                        if color == 'rojo':
+                            log.info(f"[{prefix}] Cochera {num}: sidebar roja — tomada por otro, siguiente")
+                            screenshot(page, f"{prefix}_roja_{num}")
+                            return False
                 time.sleep(0.1)
 
         except PlaywrightTimeoutError:
-            # RESERVE no visible: antes de apertura es normal, después puede ser rojo
+            # RESERVE desapareció: chequear sidebar para confirmar si es rojo
             now = ahora_arg()
             if now >= apertura_dt:
-                if ausente_desde is None:
-                    ausente_desde = now
-                ausente_seg = (now - ausente_desde).total_seconds()
-                if ausente_seg >= 20:
-                    log.info(f"[{prefix}] Cochera {num}: RESERVE ausente {ausente_seg:.1f}s post-apertura — roja, siguiente")
+                color = _color_sidebar(page, num)
+                if color == 'rojo':
+                    log.info(f"[{prefix}] Cochera {num}: RESERVE ausente + sidebar roja — tomada, siguiente")
                     screenshot(page, f"{prefix}_roja_{num}")
                     return False
             time.sleep(0.1)
