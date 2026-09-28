@@ -601,29 +601,17 @@ def _buscar_y_clickear_cochera(page, cochera_num: int) -> bool:
 
 _COLOR_JS = """
 (el) => {
-    function parseRGB(s) {
-        const m = (s || '').match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
-        return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : null;
-    }
-    function classifyRGB(rgb) {
-        if (!rgb) return null;
-        const [r, g, b] = rgb;
-        if (r > 150 && r > g * 1.5 && r > b * 1.5) return 'rojo';
-        if (g > 120 && g > r * 1.2 && g > b * 0.9) return 'verde';
-        return null;
-    }
-    const signals = [];
-    const collectColors = (node) => {
-        const cs = window.getComputedStyle(node);
-        signals.push(cs.backgroundColor, cs.borderLeftColor, cs.borderBottomColor,
-                     cs.color, cs.borderColor, cs.outlineColor);
-    };
-    collectColors(el);
-    el.querySelectorAll('*').forEach(c => collectColors(c));
-    for (const s of signals) {
-        const c = classifyRGB(parseRGB(s));
-        if (c === 'rojo' || c === 'verde') return c;
-    }
+    // La barra de color está en el div con opacity:0.72 dentro del MuiCollapse expandido.
+    // Su atributo inline `background` contiene el color real de la cochera.
+    const bar = el.querySelector('.MuiCollapse-entered [style*="opacity: 0.72"]') ||
+                el.querySelector('[style*="opacity: 0.72"]');
+    if (!bar) return 'negro';
+    const bg = bar.style.background || bar.style.backgroundColor || '';
+    const m = bg.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+    if (!m) return 'negro';
+    const [r, g, b] = [+m[1], +m[2], +m[3]];
+    if (r > 150 && r > g * 1.5 && r > b * 1.5) return 'rojo';
+    if (g > 120 && g > r * 1.2 && g > b * 0.9) return 'verde';
     return 'negro';
 }
 """
