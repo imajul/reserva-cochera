@@ -596,7 +596,6 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
     - Ausente >2s post-apertura → cochera fue tomada (rojo), retorna False
     """
     ausente_desde = None
-    refreshed = False
 
     while ahora_arg() <= deadline_global:
         with lock:
@@ -637,30 +636,18 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
                     resultado["reservado"] = True
                     resultado["cochera"] = num
                 return True
-
             else:
-                # Negro: esperar. Si ya pasó la apertura y llevamos 500ms → refresh
-                elapsed = (ahora_arg() - apertura_dt).total_seconds()
-                if elapsed >= 0.5 and not refreshed:
-                    log.info(f"[{prefix}] 500ms post-apertura sin verde — refrescando...")
-                    screenshot(page, f"{prefix}_pre_refresh_{num}")
-                    page.reload(wait_until="domcontentloaded")
-                    page.wait_for_timeout(300)
-                    _buscar_y_clickear_cochera(page, num)
-                    screenshot(page, f"{prefix}_post_refresh_{num}")
-                    refreshed = True
+                # Negro: seguir esperando sin reload (el reload pierde la selección de cochera)
                 time.sleep(0.1)
 
         except PlaywrightTimeoutError:
-            # RESERVE no visible: antes de apertura es negro normal, después puede ser rojo
+            # RESERVE no visible: antes de apertura es normal, después puede ser rojo
             now = ahora_arg()
             if now >= apertura_dt:
-                # Solo empezar a contar ausencia POST-apertura
                 if ausente_desde is None:
                     ausente_desde = now
                 ausente_seg = (now - ausente_desde).total_seconds()
                 if ausente_seg >= 20:
-                    # 20s post-apertura sin RESERVE → cochera tomada por otro
                     log.info(f"[{prefix}] Cochera {num}: RESERVE ausente {ausente_seg:.1f}s post-apertura — roja, siguiente")
                     screenshot(page, f"{prefix}_roja_{num}")
                     return False
@@ -681,7 +668,7 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
          - Negro o verde → clickear y monitorear RESERVE:
              * Verde → reservar inmediatamente
              * Negro → esperar hasta que se habilite
-             * Ausente >2s post-apertura → cochera tomada, siguiente
+             * Ausente >20s post-apertura → cochera tomada, siguiente
     """
     prefix = f"c{cochera_num}"
     with sync_playwright() as p:
