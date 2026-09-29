@@ -653,9 +653,13 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
             reserve_btn.wait_for(timeout=100)
 
             if reserve_btn.is_enabled():
+                # Reclamar el slot dentro del lock antes de clickear.
+                # Así solo UNA sesión procede — las demás ven "reservado" y salen.
                 with lock:
                     if resultado.get("reservado"):
                         return False
+                    resultado["reservado"] = True
+                    resultado["cochera"] = num
                 ts = ahora_arg().strftime('%H:%M:%S.%f')
                 log.info(f"[{prefix}] ✅ RESERVE habilitado a las {ts} — cochera {num}")
                 screenshot(page, f"{prefix}_verde_{num}")
@@ -677,9 +681,6 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
                     pass
                 screenshot(page, f"{prefix}_resultado_{num}")
                 log.info(f"[{prefix}] ✅ Reserva exitosa — Cochera {num}")
-                with lock:
-                    resultado["reservado"] = True
-                    resultado["cochera"] = num
                 return True
             else:
                 # Negro: captura cada 1s y verificar sidebar cada 2s para detectar rojo
