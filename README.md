@@ -11,20 +11,22 @@ Parkalot habilita las reservas del día siguiente a las **16:00 ARG** en punto. 
 **Qué hace el programa, paso a paso:**
 
 1. A las **15:55 ARG** se activa automáticamente (de domingo a jueves)
-2. Abre dos navegadores simultáneos con tu cuenta de Parkalot
+2. Espera hasta las **15:59** y abre 4 navegadores simultáneos con tu cuenta de Parkalot
 3. Cada navegador se posiciona en una cochera prioritaria diferente antes de las 16:00
-4. En el instante exacto de las **16:00:00**, ambos presionan el botón RESERVE al mismo tiempo
-5. El primero que logre reservar gana — Parkalot cancela automáticamente el intento del otro
-6. Si ninguno de los dos pudo reservar (cocheras tomadas), intenta con cualquier otra disponible
+4. En el instante exacto de las **16:00:00**, los 4 presionan el botón RESERVE al mismo tiempo
+5. El primero que logre reservar gana — los demás se detienen automáticamente
+6. Si ninguno pudo reservar (cocheras tomadas), intenta con cualquier otra disponible
 7. Te manda un mensaje de WhatsApp confirmando qué cochera quedó reservada (opcional)
 
 **Orden de prioridad:**
 
-| Sesión | Cochera | Ubicación |
-|--------|---------|-----------|
-| 1° (paralela) | **209** | 2do Subsuelo — Olivos |
-| 2° (paralela) | **208** | 2do Subsuelo — Olivos |
-| Fallback | **237** y cualquier disponible | — |
+| Sesión | Cochera |
+|--------|---------|
+| 1° (paralela) | **255** |
+| 2° (paralela) | **254** |
+| 3° (paralela) | **256** |
+| 4° (paralela) | **257** |
+| Fallback | cualquier disponible |
 
 **Días de ejecución:**
 
@@ -212,14 +214,14 @@ Repetí el Paso 4 para generar uno nuevo y actualizalo en cron-job.org.
 
 Editá esta línea en `reservar_cochera.py`:
 ```python
-COCHERAS_PRIORIDAD = [209, 208, 237]  # De mayor a menor preferencia
+COCHERAS_PRIORIDAD = [255, 254, 256, 257]  # De mayor a menor preferencia
 ```
 
 ### Cambiar qué cocheras se intentan en paralelo
 
 Editá esta línea en `main()` dentro de `reservar_cochera.py`:
 ```python
-COCHERAS_PARALELAS = [209, 208]  # Estas dos se intentan al mismo tiempo a las 16:00
+COCHERAS_PARALELAS = [255, 254, 256, 257]  # Estas cuatro se intentan al mismo tiempo a las 16:00
 ```
 
 ### Cambiar los días de ejecución
