@@ -50,7 +50,7 @@ jobs:
       - name: Instalar Chromium
         run: |
           playwright install chromium
-          playwright install-deps chromium
+          playwright install-deps chromium || true
       - name: Ejecutar en modo PRODUCCIÓN
         if: inputs.modo == 'produccion'
         env:
