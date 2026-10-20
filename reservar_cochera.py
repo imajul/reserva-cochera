@@ -14,6 +14,7 @@ Orden de prioridad: 255 → 254 → 256 → 257 → primera disponible en la lis
 import os
 import sys
 import time
+import json
 import logging
 import threading
 import urllib.request
@@ -508,6 +509,7 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list =
 
         screenshot(page, "resultado_reserva")
         log.info(f"✅ Reserva exitosa — Cochera {cochera_num}")
+        escribir_estado_cochera(cochera_num)
         enviar_whatsapp(
             f"✅ Cochera {cochera_num} reservada para el {fecha_manana_str()} 🚗"
         )
@@ -814,6 +816,20 @@ def _sesion_cochera(cochera_num: int, resultado: dict, lock: threading.Lock) -> 
             browser.close()
 
 
+def escribir_estado_cochera(cochera_num: int) -> None:
+    """Escribe cochera_hoy.json para que el Shortcut de iPhone lo consulte."""
+    estado = {
+        "cochera": cochera_num,
+        "fecha": fecha_manana_str(),
+    }
+    try:
+        with open("cochera_hoy.json", "w") as f:
+            json.dump(estado, f)
+        log.info(f"📋 cochera_hoy.json escrito: cochera {cochera_num} para {estado['fecha']}")
+    except Exception as e:
+        log.warning(f"No se pudo escribir cochera_hoy.json: {e}")
+
+
 def main():
     log.info("=" * 60)
     log.info("  Reserva automática de cochera — Parkalot")
@@ -858,6 +874,7 @@ def main():
 
     if reservado:
         log.info(f"✅ Cochera {cochera_ganadora} reservada para el {fecha_manana_str()}")
+        escribir_estado_cochera(cochera_ganadora)
         enviar_whatsapp(
             f"✅ Cochera {cochera_ganadora} reservada para el {fecha_manana_str()} 🚗"
         )
