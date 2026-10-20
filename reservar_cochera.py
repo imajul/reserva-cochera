@@ -77,6 +77,13 @@ def debe_ejecutar_hoy() -> bool:
 def fecha_manana_str() -> str:
     return (ahora_arg().date() + timedelta(days=1)).strftime("%Y-%m-%d")
 
+_DIAS_ES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+
+def mensaje_cochera(cochera_num: int) -> str:
+    fecha = ahora_arg().date() + timedelta(days=1)
+    dia = _DIAS_ES[fecha.weekday()]
+    return f"{dia} {fecha.strftime('%d/%m')} Cochera {cochera_num}"
+
 def esperar_hasta_previa_apertura():
     ahora = ahora_arg()
     apertura = ahora.replace(hour=HORA_APERTURA, minute=MINUTO_APERTURA, second=0, microsecond=0)
@@ -821,11 +828,12 @@ def escribir_estado_cochera(cochera_num: int) -> None:
     estado = {
         "cochera": cochera_num,
         "fecha": fecha_manana_str(),
+        "mensaje": mensaje_cochera(cochera_num),
     }
     try:
         with open("cochera_hoy.json", "w") as f:
             json.dump(estado, f)
-        log.info(f"📋 cochera_hoy.json escrito: cochera {cochera_num} para {estado['fecha']}")
+        log.info(f"📋 cochera_hoy.json escrito: {estado['mensaje']}")
     except Exception as e:
         log.warning(f"No se pudo escribir cochera_hoy.json: {e}")
 
