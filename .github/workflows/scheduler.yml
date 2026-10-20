@@ -73,7 +73,10 @@ jobs:
           if [ -f cochera_hoy.json ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add cochera_hoy.json
+            git stash
             git pull --rebase origin main
+            git stash pop
             git add cochera_hoy.json
             git diff --cached --quiet || git commit -m "chore: cochera reservada $(cat cochera_hoy.json)"
             git push origin main
