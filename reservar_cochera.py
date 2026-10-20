@@ -82,7 +82,7 @@ _DIAS_ES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Do
 def mensaje_cochera(cochera_num: int) -> str:
     fecha = ahora_arg().date() + timedelta(days=1)
     dia = _DIAS_ES[fecha.weekday()]
-    return f"{dia} {fecha.strftime('%d/%m')} Cochera {cochera_num}"
+    return f"{dia} {fecha.strftime('%d/%m')}\nCochera {cochera_num}"
 
 def esperar_hasta_previa_apertura():
     ahora = ahora_arg()
