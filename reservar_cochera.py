@@ -689,6 +689,22 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
                 except PlaywrightTimeoutError:
                     pass
                 screenshot(page, f"{prefix}_resultado_{num}")
+
+                # Verificar que la reserva realmente se concretó.
+                # Si RESERVE volvió habilitado → el servidor la rechazó.
+                try:
+                    btn_check = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
+                    btn_check.wait_for(timeout=2000)
+                    if btn_check.is_enabled():
+                        log.warning(f"[{prefix}] ⚠️ RESERVE volvió habilitado — reserva rechazada por el servidor")
+                        screenshot(page, f"{prefix}_fallo_verificacion_{num}")
+                        with lock:
+                            resultado["reservado"] = False
+                            resultado["cochera"] = None
+                        return False
+                except PlaywrightTimeoutError:
+                    pass  # RESERVE desapareció o sigue disabled — reserva exitosa
+
                 log.info(f"[{prefix}] ✅ Reserva exitosa — Cochera {num}")
                 return True
             else:
