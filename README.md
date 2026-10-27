@@ -177,13 +177,15 @@ La primera vez que se ejecute (al día siguiente hábil), podés ver qué pasó 
 ```
 reserva-cochera/
 ├── reservar_cochera.py      → Script principal
+├── cochera_hoy.json         → Cochera reservada (actualizado automáticamente)
 ├── requirements.txt         → Librerías Python necesarias
 ├── pytest.ini               → Configuración de tests
 ├── tests/
 │   └── test_unit.py         → Tests automáticos de calidad
 └── .github/
     └── workflows/
-        └── scheduler.yml    → Configuración de GitHub Actions
+        ├── scheduler.yml    → Workflow principal (corre a las 15:55 ARG)
+        └── warmup.yml       → Precalienta el cache de Chromium (15:00 ARG)
 ```
 
 ---
