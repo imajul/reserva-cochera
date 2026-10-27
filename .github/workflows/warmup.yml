@@ -1,0 +1,31 @@
+name: Precalentar cache de Chromium
+
+on:
+  schedule:
+    - cron: "0 18 * * 0,1,2,3,4"  # 18:00 UTC = 15:00 ARG, Dom-Jue
+
+jobs:
+  warmup:
+    name: Cachear Chromium
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+      - name: Restaurar cache de Chromium
+        id: cache-chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('requirements.txt') }}
+      - name: Instalar Chromium (si no hay cache)
+        if: steps.cache-chromium.outputs.cache-hit != 'true'
+        run: |
+          playwright install chromium
+          playwright install-deps chromium || true
