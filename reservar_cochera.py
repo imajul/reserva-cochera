@@ -410,37 +410,10 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list =
         return None
 
     for cochera_num in cocheras_a_intentar:
-        elemento = cocheras_disponibles[cochera_num]
         log.info(f"Seleccionando cochera {cochera_num}...")
-
-        try:
-            num_en_dom = int(elemento.locator("h6").inner_text(timeout=500).strip())
-        except Exception:
-            log.warning(f"Cochera {cochera_num}: referencia inválida — saltando")
+        if not _buscar_y_clickear_cochera(page, cochera_num):
+            log.warning(f"Cochera {cochera_num}: no encontrada en sidebar — saltando")
             continue
-
-        if num_en_dom != cochera_num:
-            log.warning(f"Cochera {cochera_num}: nodo reciclado (DOM muestra {num_en_dom}) — reubicando...")
-            elemento = None
-            for item in page.locator("button.MuiButtonBase-root:has(h6)").all():
-                try:
-                    box = item.bounding_box()
-                    if box and box["width"] >= 150 and int(item.locator("h6").inner_text().strip()) == cochera_num:
-                        elemento = item
-                        break
-                except Exception:
-                    continue
-            if elemento is None:
-                log.warning(f"Cochera {cochera_num}: no hallada tras reciclaje — saltando")
-                continue
-
-        try:
-            elemento.scroll_into_view_if_needed()
-            elemento.click()
-        except Exception:
-            log.warning(f"Cochera {cochera_num}: elemento fuera del DOM (scroll virtual) — saltando")
-            continue
-        page.wait_for_timeout(200)
         screenshot(page, f"{prefix}_cochera_{cochera_num}_sel")
 
         reserve_btn = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
@@ -515,12 +488,24 @@ def seleccionar_y_reservar_cochera(page, intento: int = 0, solo_cocheras: list =
             pass
 
         screenshot(page, "resultado_reserva")
-        log.info(f"✅ Reserva exitosa — Cochera {cochera_num}")
-        escribir_estado_cochera(cochera_num)
-        enviar_whatsapp(
-            f"✅ Cochera {cochera_num} reservada para el {fecha_manana_str()} 🚗"
-        )
-        return True
+
+        for texto_fallo in ("Not available", "Failed"):
+            try:
+                page.locator(f"text={texto_fallo}").first.wait_for(
+                    state="visible", timeout=1500
+                )
+                log.warning(f"Cochera {cochera_num}: '{texto_fallo}' — reserva rechazada. Siguiente...")
+                screenshot(page, f"{prefix}_rechazo_{cochera_num}")
+                break
+            except PlaywrightTimeoutError:
+                pass
+        else:
+            log.info(f"✅ Reserva exitosa — Cochera {cochera_num}")
+            escribir_estado_cochera(cochera_num)
+            enviar_whatsapp(
+                f"✅ Cochera {cochera_num} reservada para el {fecha_manana_str()} 🚗"
+            )
+            return True
 
     log.warning("Se intentaron todas las cocheras disponibles — todas ocupadas.")
     screenshot(page, f"{prefix}_todas_ocupadas")
@@ -691,7 +676,24 @@ def _reservar_en_detalle(page, num: int, prefix: str, resultado: dict, lock: thr
                 screenshot(page, f"{prefix}_resultado_{num}")
 
                 # Verificar que la reserva realmente se concretó.
-                # Si RESERVE volvió habilitado → el servidor la rechazó.
+                # Caso 1: texto "Not available" o toast "Failed" → rechazo explícito del servidor.
+                # Caso 2: RESERVE volvió habilitado → rechazo silencioso.
+                for texto_fallo in ("Not available", "Failed"):
+                    try:
+                        page.locator(f"text={texto_fallo}").first.wait_for(
+                            state="visible", timeout=1500
+                        )
+                        log.warning(
+                            f"[{prefix}] ⚠️ '{texto_fallo}' detectado — reserva rechazada por servidor"
+                        )
+                        screenshot(page, f"{prefix}_rechazo_{num}")
+                        with lock:
+                            resultado["reservado"] = False
+                            resultado["cochera"] = None
+                        return False
+                    except PlaywrightTimeoutError:
+                        pass
+
                 try:
                     btn_check = page.locator("button.MuiLoadingButton-root:has-text('Reserve')").first
                     btn_check.wait_for(timeout=2000)
